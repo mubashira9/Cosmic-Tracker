@@ -1,0 +1,414 @@
+import React, { useState } from 'react';
+import { Settings, LogOut, FileText, Download, User, Database, Trash2, AlertTriangle, Palette, Check } from 'lucide-react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import jsPDF from 'jspdf';
+import { supabase } from '../../lib/supabase';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemedBackground } from '../ui/ThemedBackground';
+import type { Item } from '../SpaceTracker';
+
+interface SettingsViewProps {
+  items: Item[];
+  onBack: () => void;
+  onSignOut: () => void;
+  user: SupabaseUser | null;
+}
+
+export const SettingsView: React.FC<SettingsViewProps> = ({
+  items,
+  onBack,
+  onSignOut,
+  user
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { currentTheme, setTheme, themes } = useTheme();
+
+  const exportToPDF = () => {
+    setLoading(true);
+    
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const margin = 20;
+      let yPosition = margin;
+
+      // Title
+      doc.setFontSize(20);
+      doc.setTextColor(0, 100, 200);
+      doc.text('🌌 Cosmic Tracker - Inventory Report', margin, yPosition);
+      yPosition += 15;
+
+      // Subtitle
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated on ${new Date().toLocaleDateString()} for ${user?.email}`, margin, yPosition);
+      yPosition += 20;
+
+      // Summary Stats
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text('📊 Inventory Summary', margin, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      const stats = [
+        `Total Items: ${items.length}`,
+        `Starred Items: ${items.filter(item => item.is_starred).length}`,
+        `Secured Items: ${items.filter(item => item.has_pin).length}`,
+        `Categories: ${new Set(items.map(item => item.category.id)).size}`,
+        `Total Tags: ${new Set(items.flatMap(item => item.tags || [])).size}`
+      ];
+
+      stats.forEach(stat => {
+        doc.text(stat, margin + 5, yPosition);
+        yPosition += 6;
+      });
+
+      yPosition += 10;
+
+      // Items by Category
+      const categories = [...new Set(items.map(item => item.category.name))];
+      categories.forEach(categoryName => {
+        const categoryItems = items.filter(item => item.category.name === categoryName);
+        
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(0, 100, 200);
+        doc.text(`${categoryName} (${categoryItems.length} items)`, margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+
+        categoryItems.forEach(item => {
+          if (yPosition > 270) {
+            doc.addPage();
+            yPosition = margin;
+          }
+
+          const itemText = `• ${item.name}`;
+          const locationText = `  📍 ${item.location}`;
+          
+          doc.text(itemText, margin + 5, yPosition);
+          yPosition += 5;
+          doc.setTextColor(100, 100, 100);
+          doc.text(locationText, margin + 5, yPosition);
+          yPosition += 4;
+
+          if (item.description) {
+            const descText = `  💬 ${item.description}`;
+            const splitDesc = doc.splitTextToSize(descText, pageWidth - margin * 2 - 10);
+            doc.text(splitDesc, margin + 5, yPosition);
+            yPosition += splitDesc.length * 4;
+          }
+
+          if (item.notes) {
+            const notesText = `  📝 ${item.notes}`;
+            const splitNotes = doc.splitTextToSize(notesText, pageWidth - margin * 2 - 10);
+            doc.text(splitNotes, margin + 5, yPosition);
+            yPosition += splitNotes.length * 4;
+          }
+
+          if (item.tags && item.tags.length > 0) {
+            const tagsText = `  🏷️ Tags: ${item.tags.join(', ')}`;
+            doc.text(tagsText, margin + 5, yPosition);
+            yPosition += 4;
+          }
+
+          if (item.is_starred) {
+            doc.setTextColor(255, 200, 0);
+            doc.text('  ⭐ Starred', margin + 5, yPosition);
+            yPosition += 4;
+          }
+
+          if (item.has_pin) {
+            doc.setTextColor(200, 0, 0);
+            doc.text('  🔒 PIN Protected', margin + 5, yPosition);
+            yPosition += 4;
+          }
+
+          doc.setTextColor(100, 100, 100);
+          doc.text(`  📅 Added: ${new Date(item.created_at).toLocaleDateString()}`, margin + 5, yPosition);
+          yPosition += 8;
+
+          doc.setTextColor(0, 0, 0);
+        });
+
+        yPosition += 5;
+      });
+
+      // Footer
+      const totalPages = doc.internal.pages.length - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Generated by Cosmic Tracker - Page ${i} of ${totalPages}`,
+          pageWidth / 2,
+          doc.internal.pageSize.height - 10,
+          { align: 'center' }
+        );
+      }
+
+      // Save the PDF
+      const fileName = `cosmic-tracker-inventory-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAllData = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Delete all user data
+      const { error: itemsError } = await supabase
+        .from('items')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (itemsError) {
+        console.error('Error deleting items:', itemsError);
+        alert('Error deleting data. Please try again.');
+        return;
+      }
+
+      // History and reminders will be deleted automatically due to CASCADE
+
+      alert('All data has been deleted successfully.');
+      setShowDeleteConfirm(false);
+      
+      // Refresh the page to reflect changes
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting data:', error);
+      alert('Error deleting data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <ThemedBackground>
+      <div className="p-4 max-w-md mx-auto">
+        <div className="flex items-center justify-between mb-6 pt-4">
+          <button
+            onClick={onBack}
+            className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
+          >
+            ← Back to Command Center
+          </button>
+          <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
+            <Settings className="w-6 h-6" />
+            Settings
+          </h1>
+          <button
+            onClick={onSignOut}
+            className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
+            title="Sign Out"
+          >
+            <LogOut className="w-5 h-5 text-red-400" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Theme Selection */}
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
+            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+              <Palette className="w-5 h-5" />
+              Theme Selection
+            </h2>
+            <p className={`text-${currentTheme.colors.textSecondary} text-sm mb-4`}>
+              Choose your preferred cosmic theme to personalize your experience.
+            </p>
+            
+            <div className="grid grid-cols-1 gap-3">
+              {themes.map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => setTheme(theme.id)}
+                  className={`relative p-4 rounded-lg border-2 transition-all text-left ${
+                    currentTheme.id === theme.id
+                      ? `border-${currentTheme.colors.primary} bg-${currentTheme.colors.primary}/10`
+                      : `border-${currentTheme.colors.border} hover:border-${currentTheme.colors.primary}/50 bg-gray-800/30`
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-semibold text-${currentTheme.colors.text} mb-1`}>
+                        {theme.name}
+                      </h3>
+                      <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>
+                        {theme.description}
+                      </p>
+                    </div>
+                    {currentTheme.id === theme.id && (
+                      <Check className={`w-5 h-5 text-${currentTheme.colors.primary}`} />
+                    )}
+                  </div>
+                  
+                  {/* Theme Preview */}
+                  <div className="mt-3 flex gap-2">
+                    <div className={`w-4 h-4 rounded-full bg-${theme.colors.primary}`}></div>
+                    <div className={`w-4 h-4 rounded-full bg-${theme.colors.secondary}`}></div>
+                    <div className={`w-4 h-4 rounded-full bg-${theme.colors.accent}`}></div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Account Info */}
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
+            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+              <User className="w-5 h-5" />
+              Account Information
+            </h2>
+            <div className="space-y-2 text-sm">
+              <p className={`text-${currentTheme.colors.textSecondary}`}>
+                <span className={`text-${currentTheme.colors.primary}`}>Email:</span> {user?.email}
+              </p>
+              <p className={`text-${currentTheme.colors.textSecondary}`}>
+                <span className={`text-${currentTheme.colors.primary}`}>User ID:</span> {user?.id}
+              </p>
+              <p className={`text-${currentTheme.colors.textSecondary}`}>
+                <span className={`text-${currentTheme.colors.primary}`}>Account Created:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+              </p>
+            </div>
+          </div>
+
+          {/* Data Export */}
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
+            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+              <FileText className="w-5 h-5" />
+              Data Export
+            </h2>
+            <p className={`text-${currentTheme.colors.textSecondary} text-sm mb-4`}>
+              Export your complete inventory as a PDF document for backup or sharing purposes.
+            </p>
+            <button
+              onClick={exportToPDF}
+              disabled={loading || items.length === 0}
+              className={`w-full p-3 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white`}
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Download className="w-5 h-5" />
+                  Export to PDF ({items.length} items)
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Data Statistics */}
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
+            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+              <Database className="w-5 h-5" />
+              Data Statistics
+            </h2>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                <p className={`text-2xl font-bold text-${currentTheme.colors.primary}`}>{items.length}</p>
+                <p className={`text-${currentTheme.colors.textSecondary}`}>Total Items</p>
+              </div>
+              <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                <p className="text-2xl font-bold text-yellow-400">{items.filter(item => item.is_starred).length}</p>
+                <p className={`text-${currentTheme.colors.textSecondary}`}>Starred</p>
+              </div>
+              <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                <p className="text-2xl font-bold text-red-400">{items.filter(item => item.has_pin).length}</p>
+                <p className={`text-${currentTheme.colors.textSecondary}`}>Secured</p>
+              </div>
+              <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                <p className={`text-2xl font-bold text-${currentTheme.colors.secondary}`}>{new Set(items.flatMap(item => item.tags || [])).size}</p>
+                <p className={`text-${currentTheme.colors.textSecondary}`}>Unique Tags</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="bg-red-900/20 backdrop-blur-sm rounded-xl p-4 border border-red-500/50">
+            <h2 className="text-lg font-semibold text-red-300 mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Danger Zone
+            </h2>
+            <p className="text-red-200 text-sm mb-4">
+              Permanently delete all your inventory data. This action cannot be undone.
+            </p>
+            
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full p-3 bg-red-600/20 border border-red-500/50 rounded-lg font-medium text-red-300 hover:bg-red-600/30 transition-all flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-5 h-5" />
+                Delete All Data
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-red-200 text-sm font-medium">
+                  Are you absolutely sure? This will permanently delete:
+                </p>
+                <ul className="text-red-200 text-xs space-y-1 ml-4">
+                  <li>• All {items.length} items in your inventory</li>
+                  <li>• All activity history</li>
+                  <li>• All reminders</li>
+                  <li>• All photos and data</li>
+                </ul>
+                <div className="flex gap-2">
+                  <button
+                    onClick={deleteAllData}
+                    disabled={loading}
+                    className="flex-1 p-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        Yes, Delete Everything
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="flex-1 p-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* App Info */}
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
+            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3`}>About Cosmic Tracker</h2>
+            <div className={`text-sm text-${currentTheme.colors.textSecondary} space-y-2`}>
+              <p>Version: 1.0.0</p>
+              <p>Your personal space inventory management system</p>
+              <p className={`text-xs text-${currentTheme.colors.textSecondary} mt-4`}>
+                For support, contact: <span className={`text-${currentTheme.colors.primary}`}>shaikmubashira2006@gmail.com</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ThemedBackground>
+  );
+};
