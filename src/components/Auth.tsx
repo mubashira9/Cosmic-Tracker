@@ -1,26 +1,8 @@
 import React, { useState } from 'react';
 import { Rocket, Globe, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-
-const StarField = () => (
-  <div className="fixed inset-0 overflow-hidden pointer-events-none">
-    {[...Array(100)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute bg-white rounded-full animate-pulse"
-        style={{
-          width: `${Math.random() * 3 + 1}px`,
-          height: `${Math.random() * 3 + 1}px`,
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-          opacity: Math.random() * 0.8 + 0.2,
-          animationDelay: `${Math.random() * 3}s`,
-          animationDuration: `${2 + Math.random() * 3}s`
-        }}
-      />
-    ))}
-  </div>
-);
+import { useTheme } from '../contexts/ThemeContext';
+import { ThemedBackground } from './ui/ThemedBackground';
 
 export const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -32,6 +14,7 @@ export const Auth: React.FC = () => {
   const [success, setSuccess] = useState('');
 
   const { signIn, signUp } = useAuth();
+  const { currentTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,23 +66,22 @@ export const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative">
-      <StarField />
-      
-      <div className="relative z-10 w-full max-w-md">
+    <ThemedBackground className="flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Globe className="w-10 h-10 text-cyan-400 animate-spin" style={{animationDuration: '10s'}} />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              Cosmic Tracker
+            <Globe className={`w-10 h-10 text-${currentTheme.colors.primary} animate-spin`} style={{animationDuration: '10s'}} />
+            <h1 className={`text-3xl font-bold text-${currentTheme.colors.text} drop-shadow-lg`}>
+              <span className={`text-${currentTheme.colors.primary}`}>Cosmic</span>{' '}
+              <span className={`text-${currentTheme.colors.secondary}`}>Tracker</span>
             </h1>
           </div>
-          <p className="text-gray-300">
+          <p className={`text-${currentTheme.colors.textSecondary}`}>
             {isLogin ? 'Welcome back, Space Explorer!' : 'Join the Cosmic Expedition!'}
           </p>
         </div>
 
-        <div className="bg-black bg-opacity-40 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
+        <div className={`${currentTheme.gradients.card} rounded-2xl p-8 border border-${currentTheme.colors.border}`}>
           <div className="flex justify-center mb-6">
             <div className="flex bg-gray-800/50 rounded-lg p-1">
               <button
@@ -110,8 +92,8 @@ export const Auth: React.FC = () => {
                 }}
                 className={`px-4 py-2 rounded-md font-medium transition-all ${
                   isLogin
-                    ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? `${currentTheme.gradients.button} text-white`
+                    : `text-${currentTheme.colors.textSecondary} hover:text-${currentTheme.colors.text}`
                 }`}
               >
                 Sign In
@@ -124,8 +106,8 @@ export const Auth: React.FC = () => {
                 }}
                 className={`px-4 py-2 rounded-md font-medium transition-all ${
                   !isLogin
-                    ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? `${currentTheme.gradients.button} text-white`
+                    : `text-${currentTheme.colors.textSecondary} hover:text-${currentTheme.colors.text}`
                 }`}
               >
                 Sign Up
@@ -149,34 +131,34 @@ export const Auth: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-cyan-300 mb-2">
+              <label className={`block text-sm font-medium text-${currentTheme.colors.primary} mb-2`}>
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${currentTheme.colors.textSecondary}`} />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="commander@space.galaxy"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
+                  className={`w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} placeholder-${currentTheme.colors.textSecondary} focus:border-${currentTheme.colors.primary} focus:outline-none transition-colors`}
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-cyan-300 mb-2">
+              <label className={`block text-sm font-medium text-${currentTheme.colors.primary} mb-2`}>
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${currentTheme.colors.textSecondary}`} />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
+                  className={`w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} placeholder-${currentTheme.colors.textSecondary} focus:border-${currentTheme.colors.primary} focus:outline-none transition-colors`}
                   required
                 />
               </div>
@@ -184,17 +166,17 @@ export const Auth: React.FC = () => {
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-cyan-300 mb-2">
+                <label className={`block text-sm font-medium text-${currentTheme.colors.primary} mb-2`}>
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${currentTheme.colors.textSecondary}`} />
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
+                    className={`w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} placeholder-${currentTheme.colors.textSecondary} focus:border-${currentTheme.colors.primary} focus:outline-none transition-colors`}
                     required
                   />
                 </div>
@@ -204,7 +186,7 @@ export const Auth: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full p-3 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className={`w-full p-3 ${currentTheme.gradients.button} rounded-lg font-medium text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -222,7 +204,7 @@ export const Auth: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-400">
+          <div className={`mt-6 text-center text-sm text-${currentTheme.colors.textSecondary}`}>
             {isLogin ? (
               <p>
                 New to the galaxy?{' '}
@@ -232,7 +214,7 @@ export const Auth: React.FC = () => {
                     setError('');
                     setSuccess('');
                   }}
-                  className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className={`text-${currentTheme.colors.primary} hover:text-${currentTheme.colors.secondary} transition-colors`}
                 >
                   Create an account
                 </button>
@@ -246,7 +228,7 @@ export const Auth: React.FC = () => {
                     setError('');
                     setSuccess('');
                   }}
-                  className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className={`text-${currentTheme.colors.primary} hover:text-${currentTheme.colors.secondary} transition-colors`}
                 >
                   Sign in to your mission
                 </button>
@@ -255,6 +237,6 @@ export const Auth: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </ThemedBackground>
   );
 };

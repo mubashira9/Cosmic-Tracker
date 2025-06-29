@@ -59,8 +59,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="text-center mb-6 pt-4">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Globe className={`w-8 h-8 text-${currentTheme.colors.primary} animate-spin`} style={{animationDuration: '10s'}} />
-            <h1 className={`text-2xl font-bold bg-gradient-to-r from-${currentTheme.colors.primary} to-${currentTheme.colors.secondary} bg-clip-text text-transparent`}>
-              Cosmic Tracker
+            <h1 className={`text-2xl font-bold text-${currentTheme.colors.text} drop-shadow-lg`}>
+              <span className={`text-${currentTheme.colors.primary}`}>Cosmic</span>{' '}
+              <span className={`text-${currentTheme.colors.secondary}`}>Tracker</span>
             </h1>
           </div>
           <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>Welcome back, {user?.email}</p>
