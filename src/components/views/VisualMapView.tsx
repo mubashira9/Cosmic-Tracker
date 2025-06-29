@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Image as KonvaImage, Circle, Text, Group, Rect } from 'react-konva';
-import { Map, Upload, Save, X, Plus, Trash2, Eye, EyeOff, ZoomIn, ZoomOut, RotateCcw, Package } from 'lucide-react';
+import { Map, Upload, Save, X, Plus, Trash2, Eye, EyeOff, ZoomIn, ZoomOut, RotateCcw, Package, ArrowLeft } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -12,6 +12,8 @@ interface VisualMapViewProps {
   onBack: () => void;
   onSignOut: () => void;
   user: User | null;
+  selectedItem?: Item | null;
+  onSelectedItemChange?: (item: Item | null) => void;
 }
 
 interface ItemMarker {
@@ -36,7 +38,9 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
   items,
   onBack,
   onSignOut,
-  user
+  user,
+  selectedItem,
+  onSelectedItemChange
 }) => {
   const { currentTheme } = useTheme();
   const [maps, setMaps] = useState<MapData[]>([]);
@@ -52,6 +56,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [newMapName, setNewMapName] = useState('');
   const [draggedMarker, setDraggedMarker] = useState<string | null>(null);
+  const [showMapsList, setShowMapsList] = useState(false);
   
   const stageRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +73,14 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
       setMarkers(currentMap.markers || []);
     }
   }, [currentMap]);
+
+  // Auto-select item for mapping if coming from inventory
+  useEffect(() => {
+    if (selectedItem && !newMarkerItem) {
+      setNewMarkerItem(selectedItem.id);
+      setShowAddMarker(true);
+    }
+  }, [selectedItem]);
 
   const loadMaps = async () => {
     if (!user) return;
@@ -205,6 +218,11 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
     setMarkers(prev => [...prev, newMarker]);
     setNewMarkerItem('');
     setShowAddMarker(false);
+    
+    // Clear selected item after placing marker
+    if (onSelectedItemChange) {
+      onSelectedItemChange(null);
+    }
   };
 
   const removeMarker = (markerId: string) => {
@@ -291,20 +309,170 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
 
   if (!user) return null;
 
+  // Show maps list view
+  if (showMapsList || maps.length === 0) {
+    return (
+      <ThemedBackground>
+        <div className="p-4 max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6 pt-4">
+            <button
+              onClick={onBack}
+              className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
+            >
+              ← Back to Command Center
+            </button>
+            <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
+              <Map className="w-6 h-6" />
+              Visual Maps
+            </h1>
+            <button
+              onClick={onSignOut}
+              className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
+              title="Sign Out"
+            >
+              <X className="w-5 h-5 text-red-400" />
+            </button>
+          </div>
+
+          {/* Create New Map Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => setShowUploadForm(true)}
+              className={`w-full p-4 ${currentTheme.gradients.button} rounded-xl font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 text-white`}
+            >
+              <Upload className="w-5 h-5" />
+              Create New Visual Map
+            </button>
+          </div>
+
+          {/* Upload Form */}
+          {showUploadForm && (
+            <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.primary}/50 mb-6`}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className={`font-semibold text-${currentTheme.colors.primary}`}>Create New Map</h3>
+                <button
+                  onClick={() => {
+                    setShowUploadForm(false);
+                    setNewMapName('');
+                  }}
+                  className="p-1 hover:bg-gray-700 rounded"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
+                    Map Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newMapName}
+                    onChange={(e) => setNewMapName(e.target.value)}
+                    placeholder="e.g., Living Room Floor Plan"
+                    className={`w-full p-2 bg-gray-800 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} placeholder-gray-400 focus:border-${currentTheme.colors.primary} focus:outline-none`}
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
+                    Map Image
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={!newMapName.trim()}
+                    className={`w-full p-3 border-2 border-dashed border-${currentTheme.colors.border} rounded-lg hover:border-${currentTheme.colors.primary}/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-${currentTheme.colors.textSecondary}`}
+                  >
+                    <Upload className="w-5 h-5" />
+                    Click to upload floor plan, shelf diagram, or storage map
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Maps List */}
+          <div className="space-y-4">
+            {maps.length === 0 ? (
+              <div className={`${currentTheme.gradients.card} rounded-xl p-12 border border-${currentTheme.colors.border} text-center`}>
+                <Map className={`w-16 h-16 text-${currentTheme.colors.textSecondary} mx-auto mb-4`} />
+                <p className={`text-${currentTheme.colors.textSecondary} mb-4`}>
+                  No visual maps created yet. Upload your first floor plan or storage diagram to get started!
+                </p>
+                <button
+                  onClick={() => setShowUploadForm(true)}
+                  className={`px-6 py-3 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all flex items-center gap-2 text-white mx-auto`}
+                >
+                  <Upload className="w-5 h-5" />
+                  Upload Your First Map
+                </button>
+              </div>
+            ) : (
+              <>
+                <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-4`}>
+                  Your Visual Maps ({maps.length})
+                </h2>
+                {maps.map((map) => (
+                  <div
+                    key={map.id}
+                    className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} hover:border-${currentTheme.colors.primary}/50 transition-all cursor-pointer`}
+                    onClick={() => {
+                      setCurrentMap(map);
+                      setShowMapsList(false);
+                    }}
+                  >
+                    <div className="flex items-center gap-4">
+                      {map.image_url && (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-600 flex-shrink-0">
+                          <img src={map.image_url} alt={map.name} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h3 className={`font-semibold text-${currentTheme.colors.primary} mb-1`}>
+                          {map.name}
+                        </h3>
+                        <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>
+                          {map.markers?.length || 0} item markers
+                        </p>
+                        <p className={`text-xs text-${currentTheme.colors.textSecondary}`}>
+                          Created: {new Date(map.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <ArrowLeft className={`w-5 h-5 text-${currentTheme.colors.textSecondary} transform rotate-180`} />
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      </ThemedBackground>
+    );
+  }
+
   return (
     <ThemedBackground>
       <div className="p-4 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pt-4">
           <button
-            onClick={onBack}
+            onClick={() => setShowMapsList(true)}
             className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
           >
-            ← Back to Command Center
+            ← Back to Maps
           </button>
           <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
             <Map className="w-6 h-6" />
-            Visual Inventory Map
+            {currentMap?.name || 'Visual Map'}
           </h1>
           <button
             onClick={onSignOut}
@@ -315,41 +483,9 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
           </button>
         </div>
 
-        {/* Map Selection and Controls */}
-        <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} mb-6`}>
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            <div className="flex-1 min-w-48">
-              <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
-                Select Map
-              </label>
-              <select
-                value={currentMap?.id || ''}
-                onChange={(e) => {
-                  const map = maps.find(m => m.id === e.target.value);
-                  setCurrentMap(map || null);
-                }}
-                className={`w-full p-2 bg-gray-800 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} focus:border-${currentTheme.colors.primary} focus:outline-none`}
-              >
-                <option value="">Choose a map...</option>
-                {maps.map(map => (
-                  <option key={map.id} value={map.id}>
-                    {map.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              onClick={() => setShowUploadForm(true)}
-              className={`px-4 py-2 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all flex items-center gap-2 text-white`}
-            >
-              <Upload className="w-4 h-4" />
-              Upload New Map
-            </button>
-          </div>
-
-          {/* Map Controls */}
-          {currentMap && (
+        {/* Map Controls */}
+        {currentMap && (
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} mb-6`}>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setShowAddMarker(!showAddMarker)}
@@ -400,8 +536,8 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                 Zoom: {Math.round(scale * 100)}%
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Add Marker Form */}
         {showAddMarker && (
@@ -412,6 +548,9 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                 onClick={() => {
                   setShowAddMarker(false);
                   setNewMarkerItem('');
+                  if (onSelectedItemChange) {
+                    onSelectedItemChange(null);
+                  }
                 }}
                 className="p-1 hover:bg-gray-700 rounded"
               >
@@ -443,60 +582,6 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                   Click on the map to place marker
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Upload Form */}
-        {showUploadForm && (
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.primary}/50 mb-6`}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className={`font-semibold text-${currentTheme.colors.primary}`}>Upload New Map</h3>
-              <button
-                onClick={() => {
-                  setShowUploadForm(false);
-                  setNewMapName('');
-                }}
-                className="p-1 hover:bg-gray-700 rounded"
-              >
-                <X className="w-4 h-4 text-gray-400" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
-                  Map Name
-                </label>
-                <input
-                  type="text"
-                  value={newMapName}
-                  onChange={(e) => setNewMapName(e.target.value)}
-                  placeholder="e.g., Living Room Floor Plan"
-                  className={`w-full p-2 bg-gray-800 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} placeholder-gray-400 focus:border-${currentTheme.colors.primary} focus:outline-none`}
-                />
-              </div>
-              
-              <div>
-                <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
-                  Map Image
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={!newMapName.trim()}
-                  className={`w-full p-3 border-2 border-dashed border-${currentTheme.colors.border} rounded-lg hover:border-${currentTheme.colors.primary}/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-${currentTheme.colors.textSecondary}`}
-                >
-                  <Upload className="w-5 h-5" />
-                  Click to upload floor plan, shelf diagram, or storage map
-                </button>
-              </div>
             </div>
           </div>
         )}
@@ -665,17 +750,14 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
           <div className={`${currentTheme.gradients.card} rounded-xl p-12 border border-${currentTheme.colors.border} text-center`}>
             <Map className={`w-16 h-16 text-${currentTheme.colors.textSecondary} mx-auto mb-4`} />
             <p className={`text-${currentTheme.colors.textSecondary} mb-4`}>
-              {maps.length === 0 
-                ? "No maps uploaded yet. Upload your first floor plan or storage diagram to get started!"
-                : "Select a map from the dropdown above to start placing item markers."
-              }
+              No map selected. Go back to maps list to select or create a map.
             </p>
             <button
-              onClick={() => setShowUploadForm(true)}
+              onClick={() => setShowMapsList(true)}
               className={`px-6 py-3 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all flex items-center gap-2 text-white mx-auto`}
             >
-              <Upload className="w-5 h-5" />
-              Upload Your First Map
+              <ArrowLeft className="w-5 h-5" />
+              Back to Maps
             </button>
           </div>
         )}

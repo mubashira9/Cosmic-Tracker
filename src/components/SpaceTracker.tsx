@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/supabase';
 
@@ -15,7 +16,7 @@ import { SettingsView } from './views/SettingsView';
 import { VisualMapView } from './views/VisualMapView';
 import { Help } from './Help';
 import { PinPrompt } from './ui/PinPrompt';
-import { StarField } from './ui/StarField';
+import { ThemedBackground } from './ui/ThemedBackground';
 
 // Types
 export type Item = Database['public']['Tables']['items']['Row'] & {
@@ -28,6 +29,7 @@ export type Item = Database['public']['Tables']['items']['Row'] & {
 
 export type ItemHistory = Database['public']['Tables']['item_history']['Row'];
 export type ItemReminder = Database['public']['Tables']['item_reminders']['Row'];
+export type VisualMap = Database['public']['Tables']['visual_maps']['Row'];
 
 export type NewItem = {
   name: string;
@@ -61,9 +63,11 @@ interface SpaceTrackerProps {
 
 const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onAboutClose }) => {
   const { user, signOut } = useAuth();
+  const { currentTheme } = useTheme();
   const [items, setItems] = useState<Item[]>([]);
   const [history, setHistory] = useState<ItemHistory[]>([]);
   const [reminders, setReminders] = useState<ItemReminder[]>([]);
+  const [visualMaps, setVisualMaps] = useState<VisualMap[]>([]);
   const [currentView, setCurrentView] = useState(showAboutFirst ? 'help' : 'home');
   const [loading, setLoading] = useState(true);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
@@ -71,6 +75,7 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
   const [enteredPin, setEnteredPin] = useState('');
   const [unlockedItems, setUnlockedItems] = useState<Set<string>>(new Set());
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [selectedItemForMap, setSelectedItemForMap] = useState<Item | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -84,7 +89,8 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
       await Promise.all([
         loadItems(),
         loadHistory(),
-        loadReminders()
+        loadReminders(),
+        loadVisualMaps()
       ]);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -138,6 +144,20 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
     }
 
     setReminders(data || []);
+  };
+
+  const loadVisualMaps = async () => {
+    const { data, error } = await supabase
+      .from('visual_maps')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading visual maps:', error);
+      return;
+    }
+
+    setVisualMaps(data || []);
   };
 
   const addToHistory = async (itemId: string | null, itemName: string, action: string, oldValues?: any, newValues?: any) => {
@@ -195,6 +215,7 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
     setCurrentView(view);
     setExpandedItem(null);
     setEditingItem(null);
+    setSelectedItemForMap(null);
   };
 
   const handleHelpClose = () => {
@@ -204,15 +225,21 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
     }
   };
 
+  const handleViewOnMap = (item: Item) => {
+    setSelectedItemForMap(item);
+    setCurrentView('visual-map');
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <StarField />
-        <div className="relative z-10 text-center">
-          <Globe className="w-16 h-16 text-cyan-400 animate-spin mx-auto mb-4" style={{animationDuration: '2s'}} />
-          <p className="text-white text-lg">Loading your cosmic inventory...</p>
+      <ThemedBackground>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <Globe className={`w-16 h-16 text-${currentTheme.colors.primary} animate-spin mx-auto mb-4`} style={{animationDuration: '2s'}} />
+            <p className={`text-${currentTheme.colors.text} text-lg`}>Loading your cosmic inventory...</p>
+          </div>
         </div>
-      </div>
+      </ThemedBackground>
     );
   }
 
@@ -253,6 +280,7 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
               setCurrentView('edit');
             }}
             onSignOut={handleSignOut}
+            onViewOnMap={handleViewOnMap}
           />
         );
       
@@ -331,6 +359,8 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
             onBack={() => handleViewChange('home')}
             onSignOut={handleSignOut}
             user={user}
+            selectedItem={selectedItemForMap}
+            onSelectedItemChange={setSelectedItemForMap}
           />
         );
       
