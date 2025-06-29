@@ -12,6 +12,7 @@ import { EditItemView } from './views/EditItemView';
 import { HistoryView } from './views/HistoryView';
 import { RemindersView } from './views/RemindersView';
 import { SettingsView } from './views/SettingsView';
+import { VisualMapView } from './views/VisualMapView';
 import { Help } from './Help';
 import { PinPrompt } from './ui/PinPrompt';
 import { StarField } from './ui/StarField';
@@ -316,6 +317,16 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
       case 'settings':
         return (
           <SettingsView
+            items={items}
+            onBack={() => handleViewChange('home')}
+            onSignOut={handleSignOut}
+            user={user}
+          />
+        );
+
+      case 'visual-map':
+        return (
+          <VisualMapView
             items={items}
             onBack={() => handleViewChange('home')}
             onSignOut={handleSignOut}

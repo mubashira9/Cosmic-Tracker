@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock } from 'lucide-react';
+import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock, Map } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { StarField } from '../ui/StarField';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemedBackground } from '../ui/ThemedBackground';
 import type { Item, ItemReminder } from '../SpaceTracker';
 
 interface HomeViewProps {
@@ -24,6 +25,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   user
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { currentTheme } = useTheme();
 
   const getAllTags = () => {
     const allTags = new Set<string>();
@@ -52,18 +54,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative">
-      <StarField />
-      
-      <div className="relative z-10 p-4 max-w-md mx-auto">
+    <ThemedBackground>
+      <div className="p-4 max-w-md mx-auto">
         <div className="text-center mb-6 pt-4">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Globe className="w-8 h-8 text-cyan-400 animate-spin" style={{animationDuration: '10s'}} />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+            <Globe className={`w-8 h-8 text-${currentTheme.colors.primary} animate-spin`} style={{animationDuration: '10s'}} />
+            <h1 className={`text-2xl font-bold bg-gradient-to-r from-${currentTheme.colors.primary} to-${currentTheme.colors.secondary} bg-clip-text text-transparent`}>
               Cosmic Tracker
             </h1>
           </div>
-          <p className="text-sm text-gray-300">Welcome back, {user?.email}</p>
+          <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>Welcome back, {user?.email}</p>
           <button
             onClick={onSignOut}
             className="mt-2 px-3 py-1 bg-red-600/20 border border-red-500/50 rounded-full text-red-300 hover:bg-red-600/30 transition-colors text-xs flex items-center gap-1 mx-auto"
@@ -74,13 +74,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${currentTheme.colors.textSecondary}`} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Quick search across the galaxy..."
-            className="w-full pl-10 pr-4 py-3 bg-black bg-opacity-40 border border-purple-500 rounded-xl text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none backdrop-blur-sm"
+            className={`w-full pl-10 pr-4 py-3 ${currentTheme.gradients.card} border border-${currentTheme.colors.border} rounded-xl text-${currentTheme.colors.text} placeholder-${currentTheme.colors.textSecondary} focus:border-${currentTheme.colors.primary} focus:outline-none`}
           />
         </div>
 
@@ -106,7 +106,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="space-y-4 mb-6">
           <button
             onClick={() => onViewChange('add')}
-            className="w-full p-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-medium hover:from-cyan-400 hover:to-purple-500 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/25"
+            className={`w-full p-4 ${currentTheme.gradients.button} rounded-xl font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg text-white`}
           >
             <Plus className="w-5 h-5" />
             Add New Item to Inventory
@@ -114,7 +114,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           <button
             onClick={() => onViewChange('inventory')}
-            className="w-full p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-medium hover:from-purple-500 hover:to-pink-500 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/25"
+            className={`w-full p-4 bg-gradient-to-r from-${currentTheme.colors.secondary} to-pink-600 rounded-xl font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg text-white`}
           >
             <Package className="w-5 h-5" />
             View Full Inventory ({items.length} items)
@@ -124,8 +124,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Navigation Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <button
+            onClick={() => onViewChange('visual-map')}
+            className={`p-4 bg-gradient-to-r from-${currentTheme.colors.primary} to-${currentTheme.colors.secondary} rounded-xl font-medium hover:opacity-90 transition-all flex flex-col items-center gap-2 shadow-lg text-white`}
+          >
+            <Map className="w-6 h-6" />
+            <span className="text-sm">Visual Map</span>
+          </button>
+
+          <button
             onClick={() => onViewChange('reminders')}
-            className="p-4 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl font-medium hover:from-orange-500 hover:to-red-500 transition-all flex flex-col items-center gap-2 shadow-lg hover:shadow-orange-500/25"
+            className="p-4 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl font-medium hover:opacity-90 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
           >
             <Bell className="w-6 h-6" />
             <span className="text-sm">Reminders</span>
@@ -138,7 +146,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           <button
             onClick={() => onViewChange('history')}
-            className="p-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-medium hover:from-green-500 hover:to-teal-500 transition-all flex flex-col items-center gap-2 shadow-lg hover:shadow-green-500/25"
+            className="p-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-medium hover:opacity-90 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
           >
             <History className="w-6 h-6" />
             <span className="text-sm">History</span>
@@ -146,29 +154,31 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           <button
             onClick={() => onViewChange('settings')}
-            className="p-4 bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl font-medium hover:from-gray-500 hover:to-slate-500 transition-all flex flex-col items-center gap-2 shadow-lg hover:shadow-gray-500/25"
+            className="p-4 bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl font-medium hover:opacity-90 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
           >
             <Settings className="w-6 h-6" />
             <span className="text-sm">Settings</span>
           </button>
+        </div>
 
+        <div className="grid grid-cols-1 gap-4 mb-6">
           <button
             onClick={() => onViewChange('help')}
-            className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl font-medium hover:from-blue-500 hover:to-indigo-500 transition-all flex flex-col items-center gap-2 shadow-lg hover:shadow-blue-500/25"
+            className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg text-white"
           >
             <HelpCircle className="w-6 h-6" />
-            <span className="text-sm">Help</span>
+            <span className="text-sm">Help & Guide</span>
           </button>
         </div>
 
         {searchTerm && (
-          <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 mb-6">
-            <h3 className="text-sm font-medium text-cyan-300 mb-3 flex items-center gap-2">
+          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} mb-6`}>
+            <h3 className={`text-sm font-medium text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
               <Search className="w-4 h-4" />
               Quick Search Results
             </h3>
             {filteredItems.length === 0 ? (
-              <p className="text-gray-400 text-sm">No items found matching "{searchTerm}"</p>
+              <p className={`text-${currentTheme.colors.textSecondary} text-sm`}>No items found matching "{searchTerm}"</p>
             ) : (
               <div className="space-y-2">
                 {filteredItems.slice(0, 3).map((item) => (
@@ -193,7 +203,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <span className="text-cyan-300 text-sm truncate">{item.name}</span>
+                        <span className={`text-${currentTheme.colors.primary} text-sm truncate`}>{item.name}</span>
                         {item.is_starred && <Star className="w-3 h-3 text-yellow-400 fill-current flex-shrink-0" />}
                         {item.has_pin && <Lock className="w-3 h-3 text-red-400 flex-shrink-0" />}
                       </div>
@@ -201,11 +211,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </div>
                 ))}
                 {filteredItems.length > 3 && (
-                  <p className="text-xs text-gray-400">
+                  <p className={`text-xs text-${currentTheme.colors.textSecondary}`}>
                     +{filteredItems.length - 3} more results. 
                     <button 
                       onClick={() => onViewChange('inventory')}
-                      className="text-cyan-400 hover:text-cyan-300 ml-1"
+                      className={`text-${currentTheme.colors.primary} hover:text-${currentTheme.colors.secondary} ml-1`}
                     >
                       View all →
                     </button>
@@ -217,9 +227,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
         )}
 
         {items.length > 0 && !searchTerm && (
-          <div className="mt-8 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30">
-            <h3 className="text-sm font-medium text-cyan-300 mb-2">Mission Stats</h3>
-            <div className="text-sm text-gray-300">
+          <div className={`mt-8 ${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
+            <h3 className={`text-sm font-medium text-${currentTheme.colors.primary} mb-2`}>Mission Stats</h3>
+            <div className={`text-sm text-${currentTheme.colors.textSecondary}`}>
               <p>🚀 Total Items: {items.length}</p>
               <p>⭐ Starred Items: {items.filter(item => item.is_starred).length}</p>
               <p>🔒 Secured Items: {items.filter(item => item.has_pin).length}</p>
@@ -229,6 +239,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </ThemedBackground>
   );
 };
