@@ -150,6 +150,35 @@ export type Database = {
           updated_at?: string;
         };
       };
+      visual_maps: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          image_url: string | null;
+          markers: any;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          image_url?: string | null;
+          markers?: any;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          image_url?: string | null;
+          markers?: any;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };
