@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/supabase';
 
@@ -16,7 +15,7 @@ import { SettingsView } from './views/SettingsView';
 import { VisualMapView } from './views/VisualMapView';
 import { Help } from './Help';
 import { PinPrompt } from './ui/PinPrompt';
-import { ThemedBackground } from './ui/ThemedBackground';
+import { StarField } from './ui/StarField';
 
 // Types
 export type Item = Database['public']['Tables']['items']['Row'] & {
@@ -63,7 +62,6 @@ interface SpaceTrackerProps {
 
 const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onAboutClose }) => {
   const { user, signOut } = useAuth();
-  const { currentTheme } = useTheme();
   const [items, setItems] = useState<Item[]>([]);
   const [history, setHistory] = useState<ItemHistory[]>([]);
   const [reminders, setReminders] = useState<ItemReminder[]>([]);
@@ -232,14 +230,13 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
 
   if (loading) {
     return (
-      <ThemedBackground>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <Globe className={`w-16 h-16 text-${currentTheme.colors.primary} animate-spin mx-auto mb-4`} style={{animationDuration: '2s'}} />
-            <p className={`text-${currentTheme.colors.text} text-lg`}>Loading your cosmic inventory...</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 flex items-center justify-center">
+        <StarField />
+        <div className="relative z-10 text-center">
+          <Globe className="w-16 h-16 text-slate-400 animate-spin mx-auto mb-4" style={{animationDuration: '2s'}} />
+          <p className="text-white text-lg">Loading your cosmic inventory...</p>
         </div>
-      </ThemedBackground>
+      </div>
     );
   }
 

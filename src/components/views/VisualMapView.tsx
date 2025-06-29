@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Image as KonvaImage, Circle, Text, Group, Rect } from 'react-konva';
-import { Map, Upload, Save, X, Plus, Trash2, Eye, EyeOff, ZoomIn, ZoomOut, RotateCcw, Package, ArrowLeft } from 'lucide-react';
+import { Map, Upload, Save, X, Plus, Trash2, Eye, EyeOff, ZoomIn, ZoomOut, RotateCcw, Package, ArrowLeft, LogOut } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
-import { useTheme } from '../../contexts/ThemeContext';
-import { ThemedBackground } from '../ui/ThemedBackground';
+import { StarField } from '../ui/StarField';
 import type { Item } from '../SpaceTracker';
 
 interface VisualMapViewProps {
@@ -42,7 +41,6 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
   selectedItem,
   onSelectedItemChange
 }) => {
-  const { currentTheme } = useTheme();
   const [maps, setMaps] = useState<MapData[]>([]);
   const [currentMap, setCurrentMap] = useState<MapData | null>(null);
   const [mapImage, setMapImage] = useState<HTMLImageElement | null>(null);
@@ -56,7 +54,6 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [newMapName, setNewMapName] = useState('');
   const [draggedMarker, setDraggedMarker] = useState<string | null>(null);
-  const [showMapsList, setShowMapsList] = useState(false);
   
   const stageRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,9 +95,6 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
       }
 
       setMaps(data || []);
-      if (data && data.length > 0 && !currentMap) {
-        setCurrentMap(data[0]);
-      }
     } catch (error) {
       console.error('Error loading maps:', error);
     }
@@ -309,20 +303,22 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
 
   if (!user) return null;
 
-  // Show maps list view
-  if (showMapsList || maps.length === 0) {
+  // Show maps list view by default
+  if (!currentMap) {
     return (
-      <ThemedBackground>
-        <div className="p-4 max-w-2xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+        <StarField />
+        
+        <div className="relative z-10 p-4 max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 pt-4">
             <button
               onClick={onBack}
-              className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
+              className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30"
             >
               ← Back to Command Center
             </button>
-            <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
+            <h1 className="text-xl font-bold flex items-center gap-2 text-slate-400">
               <Map className="w-6 h-6" />
               Visual Maps
             </h1>
@@ -331,7 +327,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
               className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
               title="Sign Out"
             >
-              <X className="w-5 h-5 text-red-400" />
+              <LogOut className="w-5 h-5 text-red-400" />
             </button>
           </div>
 
@@ -339,7 +335,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
           <div className="mb-6">
             <button
               onClick={() => setShowUploadForm(true)}
-              className={`w-full p-4 ${currentTheme.gradients.button} rounded-xl font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 text-white`}
+              className="w-full p-4 bg-gradient-to-r from-slate-500 to-gray-600 rounded-xl font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center gap-2 text-white"
             >
               <Upload className="w-5 h-5" />
               Create New Visual Map
@@ -348,9 +344,9 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
 
           {/* Upload Form */}
           {showUploadForm && (
-            <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.primary}/50 mb-6`}>
+            <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className={`font-semibold text-${currentTheme.colors.primary}`}>Create New Map</h3>
+                <h3 className="font-semibold text-slate-400">Create New Map</h3>
                 <button
                   onClick={() => {
                     setShowUploadForm(false);
@@ -364,7 +360,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
               
               <div className="space-y-4">
                 <div>
-                  <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
+                  <label className="block text-sm font-medium mb-2 text-slate-400">
                     Map Name
                   </label>
                   <input
@@ -372,12 +368,12 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                     value={newMapName}
                     onChange={(e) => setNewMapName(e.target.value)}
                     placeholder="e.g., Living Room Floor Plan"
-                    className={`w-full p-2 bg-gray-800 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} placeholder-gray-400 focus:border-${currentTheme.colors.primary} focus:outline-none`}
+                    className="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-slate-400 focus:outline-none"
                   />
                 </div>
                 
                 <div>
-                  <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
+                  <label className="block text-sm font-medium mb-2 text-slate-400">
                     Map Image
                   </label>
                   <input
@@ -390,7 +386,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={!newMapName.trim()}
-                    className={`w-full p-3 border-2 border-dashed border-${currentTheme.colors.border} rounded-lg hover:border-${currentTheme.colors.primary}/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-${currentTheme.colors.textSecondary}`}
+                    className="w-full p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-slate-400/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-gray-400"
                   >
                     <Upload className="w-5 h-5" />
                     Click to upload floor plan, shelf diagram, or storage map
@@ -403,14 +399,14 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
           {/* Maps List */}
           <div className="space-y-4">
             {maps.length === 0 ? (
-              <div className={`${currentTheme.gradients.card} rounded-xl p-12 border border-${currentTheme.colors.border} text-center`}>
-                <Map className={`w-16 h-16 text-${currentTheme.colors.textSecondary} mx-auto mb-4`} />
-                <p className={`text-${currentTheme.colors.textSecondary} mb-4`}>
+              <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-12 border border-gray-500/30 text-center">
+                <Map className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-4">
                   No visual maps created yet. Upload your first floor plan or storage diagram to get started!
                 </p>
                 <button
                   onClick={() => setShowUploadForm(true)}
-                  className={`px-6 py-3 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all flex items-center gap-2 text-white mx-auto`}
+                  className="px-6 py-3 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center gap-2 text-white mx-auto"
                 >
                   <Upload className="w-5 h-5" />
                   Upload Your First Map
@@ -418,17 +414,14 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
               </div>
             ) : (
               <>
-                <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-4`}>
+                <h2 className="text-lg font-semibold text-slate-400 mb-4">
                   Your Visual Maps ({maps.length})
                 </h2>
                 {maps.map((map) => (
                   <div
                     key={map.id}
-                    className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} hover:border-${currentTheme.colors.primary}/50 transition-all cursor-pointer`}
-                    onClick={() => {
-                      setCurrentMap(map);
-                      setShowMapsList(false);
-                    }}
+                    className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-slate-400/50 transition-all cursor-pointer"
+                    onClick={() => setCurrentMap(map)}
                   >
                     <div className="flex items-center gap-4">
                       {map.image_url && (
@@ -437,17 +430,17 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                         </div>
                       )}
                       <div className="flex-1">
-                        <h3 className={`font-semibold text-${currentTheme.colors.primary} mb-1`}>
+                        <h3 className="font-semibold text-slate-400 mb-1">
                           {map.name}
                         </h3>
-                        <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>
+                        <p className="text-sm text-gray-400">
                           {map.markers?.length || 0} item markers
                         </p>
-                        <p className={`text-xs text-${currentTheme.colors.textSecondary}`}>
+                        <p className="text-xs text-gray-500">
                           Created: {new Date(map.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <ArrowLeft className={`w-5 h-5 text-${currentTheme.colors.textSecondary} transform rotate-180`} />
+                      <ArrowLeft className="w-5 h-5 text-gray-400 transform rotate-180" />
                     </div>
                   </div>
                 ))}
@@ -455,22 +448,24 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
             )}
           </div>
         </div>
-      </ThemedBackground>
+      </div>
     );
   }
 
   return (
-    <ThemedBackground>
-      <div className="p-4 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+      <StarField />
+      
+      <div className="relative z-10 p-4 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pt-4">
           <button
-            onClick={() => setShowMapsList(true)}
-            className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
+            onClick={() => setCurrentMap(null)}
+            className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30"
           >
             ← Back to Maps
           </button>
-          <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
+          <h1 className="text-xl font-bold flex items-center gap-2 text-slate-400">
             <Map className="w-6 h-6" />
             {currentMap?.name || 'Visual Map'}
           </h1>
@@ -479,20 +474,20 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
             className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
             title="Sign Out"
           >
-            <X className="w-5 h-5 text-red-400" />
+            <LogOut className="w-5 h-5 text-red-400" />
           </button>
         </div>
 
         {/* Map Controls */}
         {currentMap && (
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} mb-6`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 mb-6">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setShowAddMarker(!showAddMarker)}
                 className={`px-3 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
                   showAddMarker 
-                    ? `bg-${currentTheme.colors.primary}/20 text-${currentTheme.colors.primary} border border-${currentTheme.colors.primary}/50`
-                    : `bg-gray-700 text-gray-300 hover:bg-gray-600`
+                    ? 'bg-slate-400/20 text-slate-400 border border-slate-400/50'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
                 <Plus className="w-4 h-4" />
@@ -502,7 +497,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
               <button
                 onClick={saveMarkers}
                 disabled={loading}
-                className={`px-3 py-2 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all flex items-center gap-2 text-white disabled:opacity-50`}
+                className="px-3 py-2 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center gap-2 text-white disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 Save Changes
@@ -532,7 +527,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                 </button>
               </div>
 
-              <div className={`text-sm text-${currentTheme.colors.textSecondary} ml-4`}>
+              <div className="text-sm text-gray-400 ml-4">
                 Zoom: {Math.round(scale * 100)}%
               </div>
             </div>
@@ -541,9 +536,9 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
 
         {/* Add Marker Form */}
         {showAddMarker && (
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.primary}/50 mb-6`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className={`font-semibold text-${currentTheme.colors.primary}`}>Add Item Marker</h3>
+              <h3 className="font-semibold text-slate-400">Add Item Marker</h3>
               <button
                 onClick={() => {
                   setShowAddMarker(false);
@@ -560,13 +555,13 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
             
             <div className="flex gap-4 items-end">
               <div className="flex-1">
-                <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>
+                <label className="block text-sm font-medium mb-2 text-slate-400">
                   Select Item to Mark
                 </label>
                 <select
                   value={newMarkerItem}
                   onChange={(e) => setNewMarkerItem(e.target.value)}
-                  className={`w-full p-2 bg-gray-800 border border-${currentTheme.colors.border} rounded-lg text-${currentTheme.colors.text} focus:border-${currentTheme.colors.primary} focus:outline-none`}
+                  className="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-slate-400 focus:outline-none"
                 >
                   <option value="">Choose an item...</option>
                   {availableItems.map(item => (
@@ -578,7 +573,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
               </div>
               
               {newMarkerItem && (
-                <div className={`text-sm text-${currentTheme.colors.primary} px-3 py-2 bg-${currentTheme.colors.primary}/10 rounded-lg`}>
+                <div className="text-sm text-slate-400 px-3 py-2 bg-slate-400/10 rounded-lg">
                   Click on the map to place marker
                 </div>
               )}
@@ -590,7 +585,7 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
         {currentMap && mapImage ? (
           <div className="flex gap-6">
             {/* Canvas */}
-            <div className={`flex-1 ${currentTheme.gradients.card} rounded-xl border border-${currentTheme.colors.border} overflow-hidden`}>
+            <div className="flex-1 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl border border-gray-500/30 overflow-hidden">
               <Stage
                 ref={stageRef}
                 width={800}
@@ -631,8 +626,8 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                       {/* Marker Circle */}
                       <Circle
                         radius={20}
-                        fill={selectedMarker === marker.id ? '#ff6b6b' : '#4ecdc4'}
-                        stroke={selectedMarker === marker.id ? '#ff5252' : '#26a69a'}
+                        fill={selectedMarker === marker.id ? '#ff6b6b' : '#64748b'}
+                        stroke={selectedMarker === marker.id ? '#ff5252' : '#475569'}
                         strokeWidth={3}
                         shadowColor="black"
                         shadowBlur={10}
@@ -674,15 +669,15 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
             </div>
 
             {/* Markers Panel */}
-            <div className={`w-80 ${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-              <h3 className={`font-semibold text-${currentTheme.colors.primary} mb-4 flex items-center gap-2`}>
+            <div className="w-80 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+              <h3 className="font-semibold text-slate-400 mb-4 flex items-center gap-2">
                 <Package className="w-5 h-5" />
                 Item Markers ({markers.length})
               </h3>
               
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {markers.length === 0 ? (
-                  <p className={`text-${currentTheme.colors.textSecondary} text-sm text-center py-8`}>
+                  <p className="text-gray-400 text-sm text-center py-8">
                     No markers added yet. Click "Add Marker" to start placing items on your map.
                   </p>
                 ) : (
@@ -691,8 +686,8 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                       key={marker.id}
                       className={`p-3 rounded-lg border transition-all cursor-pointer ${
                         selectedMarker === marker.id
-                          ? `border-${currentTheme.colors.primary} bg-${currentTheme.colors.primary}/10`
-                          : `border-${currentTheme.colors.border} hover:border-${currentTheme.colors.primary}/50`
+                          ? 'border-slate-400 bg-slate-400/10'
+                          : 'border-gray-600 hover:border-slate-400/50'
                       }`}
                       onClick={() => setSelectedMarker(marker.id)}
                     >
@@ -700,10 +695,10 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{getItemIcon(marker.itemId)}</span>
                           <div>
-                            <p className={`font-medium text-${currentTheme.colors.text} text-sm`}>
+                            <p className="font-medium text-white text-sm">
                               {getItemName(marker.itemId)}
                             </p>
-                            <p className={`text-xs text-${currentTheme.colors.textSecondary}`}>
+                            <p className="text-xs text-gray-400">
                               Position: ({Math.round(marker.x)}, {Math.round(marker.y)})
                             </p>
                           </div>
@@ -742,19 +737,19 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
             </div>
           </div>
         ) : currentMap ? (
-          <div className={`${currentTheme.gradients.card} rounded-xl p-12 border border-${currentTheme.colors.border} text-center`}>
-            <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className={`text-${currentTheme.colors.textSecondary}`}>Loading map image...</p>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-12 border border-gray-500/30 text-center">
+            <div className="w-16 h-16 border-4 border-slate-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading map image...</p>
           </div>
         ) : (
-          <div className={`${currentTheme.gradients.card} rounded-xl p-12 border border-${currentTheme.colors.border} text-center`}>
-            <Map className={`w-16 h-16 text-${currentTheme.colors.textSecondary} mx-auto mb-4`} />
-            <p className={`text-${currentTheme.colors.textSecondary} mb-4`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-12 border border-gray-500/30 text-center">
+            <Map className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-400 mb-4">
               No map selected. Go back to maps list to select or create a map.
             </p>
             <button
-              onClick={() => setShowMapsList(true)}
-              className={`px-6 py-3 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all flex items-center gap-2 text-white mx-auto`}
+              onClick={() => setCurrentMap(null)}
+              className="px-6 py-3 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center gap-2 text-white mx-auto"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Maps
@@ -762,6 +757,6 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
           </div>
         )}
       </div>
-    </ThemedBackground>
+    </div>
   );
 };
