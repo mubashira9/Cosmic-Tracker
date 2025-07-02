@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, X, Edit, Trash2, Package, LogOut, Tag, Star } from 'lucide-react';
+import { Users, Plus, X, Edit, Trash2, Package, LogOut, Tag, Star, Check } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { StarField } from '../ui/StarField';
@@ -15,11 +15,13 @@ interface GroupsViewProps {
 
 interface ItemGroup {
   id: string;
+  user_id: string;
   name: string;
   description: string;
   color: string;
   icon: string;
   created_at: string;
+  updated_at: string;
 }
 
 export const GroupsView: React.FC<GroupsViewProps> = ({
@@ -31,6 +33,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
 }) => {
   const [groups, setGroups] = useState<ItemGroup[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showItemSelector, setShowItemSelector] = useState<string | null>(null);
   const [newGroup, setNewGroup] = useState({
     name: '',
     description: '',
@@ -38,7 +41,6 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     icon: '📦'
   });
   const [loading, setLoading] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<ItemGroup | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
   const groupColors = [
@@ -61,35 +63,24 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
   }, [user]);
 
   const loadGroups = async () => {
-    // For now, we'll simulate groups with a simple structure
-    // In a real implementation, you'd have a groups table
-    const mockGroups: ItemGroup[] = [
-      {
-        id: 'photography',
-        name: 'Photography Equipment',
-        description: 'All camera gear, lenses, and accessories',
-        color: 'blue',
-        icon: '📷',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'kitchen',
-        name: 'Kitchen Gadgets',
-        description: 'Small appliances and cooking tools',
-        color: 'green',
-        icon: '🍳',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'electronics',
-        name: 'Electronics Collection',
-        description: 'Cables, chargers, and electronic devices',
-        color: 'purple',
-        icon: '⚡',
-        created_at: new Date().toISOString()
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('item_groups')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading groups:', error);
+        return;
       }
-    ];
-    setGroups(mockGroups);
+
+      setGroups(data || []);
+    } catch (error) {
+      console.error('Error loading groups:', error);
+    }
   };
 
   const createGroup = async () => {
@@ -98,17 +89,27 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     try {
       setLoading(true);
       
-      // In a real implementation, you'd save to a groups table
-      const group: ItemGroup = {
-        id: `group_${Date.now()}`,
-        name: newGroup.name.trim(),
-        description: newGroup.description.trim(),
-        color: newGroup.color,
-        icon: newGroup.icon,
-        created_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('item_groups')
+        .insert([
+          {
+            user_id: user.id,
+            name: newGroup.name.trim(),
+            description: newGroup.description.trim(),
+            color: newGroup.color,
+            icon: newGroup.icon,
+          }
+        ])
+        .select()
+        .single();
 
-      setGroups(prev => [...prev, group]);
+      if (error) {
+        console.error('Error creating group:', error);
+        alert('Error creating group. Please try again.');
+        return;
+      }
+
+      setGroups(prev => [data, ...prev]);
       setNewGroup({ name: '', description: '', color: 'blue', icon: '📦' });
       setShowAddForm(false);
     } catch (error) {
@@ -127,10 +128,31 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     try {
       setLoading(true);
       
-      // Remove group and update items
+      // First, remove group_id from all items in this group
+      const { error: itemsError } = await supabase
+        .from('items')
+        .update({ group_id: null })
+        .eq('group_id', groupId);
+
+      if (itemsError) {
+        console.error('Error ungrouping items:', itemsError);
+        alert('Error ungrouping items. Please try again.');
+        return;
+      }
+
+      // Then delete the group
+      const { error } = await supabase
+        .from('item_groups')
+        .delete()
+        .eq('id', groupId);
+
+      if (error) {
+        console.error('Error deleting group:', error);
+        alert('Error deleting group. Please try again.');
+        return;
+      }
+
       setGroups(prev => prev.filter(g => g.id !== groupId));
-      
-      // In a real implementation, you'd update items in the database
       onItemsUpdated();
     } catch (error) {
       console.error('Error deleting group:', error);
@@ -140,17 +162,61 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     }
   };
 
+  const addItemToGroup = async (itemId: string, groupId: string) => {
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from('items')
+        .update({ group_id: groupId })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error adding item to group:', error);
+        alert('Error adding item to group. Please try again.');
+        return;
+      }
+
+      onItemsUpdated();
+      setShowItemSelector(null);
+    } catch (error) {
+      console.error('Error adding item to group:', error);
+      alert('Error adding item to group. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeItemFromGroup = async (itemId: string) => {
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from('items')
+        .update({ group_id: null })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error removing item from group:', error);
+        alert('Error removing item from group. Please try again.');
+        return;
+      }
+
+      onItemsUpdated();
+    } catch (error) {
+      console.error('Error removing item from group:', error);
+      alert('Error removing item from group. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getGroupItems = (groupId: string) => {
-    // In a real implementation, items would have a group_id field
-    // For now, we'll simulate by checking tags or names
-    const group = groups.find(g => g.id === groupId);
-    if (!group) return [];
-    
-    return items.filter(item => 
-      item.tags?.some(tag => tag.toLowerCase().includes(group.name.toLowerCase().split(' ')[0])) ||
-      item.name.toLowerCase().includes(group.name.toLowerCase().split(' ')[0]) ||
-      item.category.name.toLowerCase().includes(group.name.toLowerCase().split(' ')[0])
-    );
+    return items.filter(item => item.group_id === groupId);
+  };
+
+  const getUngroupedItems = () => {
+    return items.filter(item => !item.group_id);
   };
 
   const getColorClass = (colorId: string) => {
@@ -307,6 +373,53 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
           </div>
         )}
 
+        {/* Item Selector Modal */}
+        {showItemSelector && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-500/30 max-w-md w-full max-h-96 overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-emerald-300">Add Items to Group</h3>
+                <button
+                  onClick={() => setShowItemSelector(null)}
+                  className="p-1 hover:bg-gray-700 rounded"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+              
+              <div className="space-y-2">
+                {getUngroupedItems().map(item => (
+                  <div
+                    key={item.id}
+                    onClick={() => addItemToGroup(item.id, showItemSelector)}
+                    className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-600/50 hover:border-emerald-400/50 cursor-pointer transition-all"
+                  >
+                    {item.item_image_url ? (
+                      <div className="w-10 h-10 rounded overflow-hidden border border-gray-600 flex-shrink-0">
+                        <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg">{item.category.icon}</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">{item.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{item.location}</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {getUngroupedItems().length === 0 && (
+                  <p className="text-gray-400 text-center py-4">
+                    All items are already in groups
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Groups List */}
         <div className="space-y-4">
           {groups.length === 0 ? (
@@ -354,19 +467,15 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-400">
-                            {groupItems.length} items
-                          </span>
-                          
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setEditingGroup(group);
+                              setShowItemSelector(group.id);
                             }}
-                            className="p-1 hover:bg-gray-700 rounded transition-colors text-blue-400"
-                            title="Edit group"
+                            className="p-1 hover:bg-gray-700 rounded transition-colors text-green-400"
+                            title="Add items to group"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Plus className="w-4 h-4" />
                           </button>
                           
                           <button
@@ -384,40 +493,59 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
                     </div>
 
                     {/* Show items in this group */}
-                    {isSelected && groupItems.length > 0 && (
+                    {isSelected && (
                       <div className="ml-4 space-y-2">
-                        {groupItems.map(item => (
-                          <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-600/50">
-                            {item.item_image_url ? (
-                              <div className="w-10 h-10 rounded overflow-hidden border border-gray-600 flex-shrink-0">
-                                <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
-                              </div>
-                            ) : (
-                              <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                <span className="text-lg">{item.category.icon}</span>
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm text-white truncate">{item.name}</p>
-                                {item.is_starred && <Star className="w-3 h-3 text-yellow-400 fill-current flex-shrink-0" />}
-                              </div>
-                              <p className="text-xs text-gray-400 truncate">{item.location}</p>
-                              {item.tags && item.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {item.tags.slice(0, 3).map(tag => (
-                                    <span key={tag} className="px-1 py-0.5 bg-emerald-600/30 rounded text-xs text-emerald-200">
-                                      #{tag}
-                                    </span>
-                                  ))}
-                                  {item.tags.length > 3 && (
-                                    <span className="text-xs text-gray-500">+{item.tags.length - 3}</span>
-                                  )}
+                        {groupItems.length === 0 ? (
+                          <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-600/30 text-center">
+                            <p className="text-gray-400 text-sm">No items in this group yet.</p>
+                            <button
+                              onClick={() => setShowItemSelector(group.id)}
+                              className="mt-2 px-3 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 rounded text-emerald-300 text-sm transition-colors"
+                            >
+                              Add Items
+                            </button>
+                          </div>
+                        ) : (
+                          groupItems.map(item => (
+                            <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-600/50 group">
+                              {item.item_image_url ? (
+                                <div className="w-10 h-10 rounded overflow-hidden border border-gray-600 flex-shrink-0">
+                                  <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-lg">{item.category.icon}</span>
                                 </div>
                               )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm text-white truncate">{item.name}</p>
+                                  {item.is_starred && <Star className="w-3 h-3 text-yellow-400 fill-current flex-shrink-0" />}
+                                </div>
+                                <p className="text-xs text-gray-400 truncate">{item.location}</p>
+                                {item.tags && item.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {item.tags.slice(0, 3).map(tag => (
+                                      <span key={tag} className="px-1 py-0.5 bg-emerald-600/30 rounded text-xs text-emerald-200">
+                                        #{tag}
+                                      </span>
+                                    ))}
+                                    {item.tags.length > 3 && (
+                                      <span className="text-xs text-gray-500">+{item.tags.length - 3}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => removeItemFromGroup(item.id)}
+                                className="p-1 hover:bg-gray-700 rounded transition-colors text-red-400 opacity-0 group-hover:opacity-100"
+                                title="Remove from group"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
@@ -427,6 +555,29 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
           )}
         </div>
 
+        {/* Ungrouped Items */}
+        {getUngroupedItems().length > 0 && (
+          <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30">
+            <h3 className="text-lg font-semibold text-yellow-300 mb-3">Ungrouped Items ({getUngroupedItems().length})</h3>
+            <p className="text-gray-300 text-sm mb-3">
+              These items aren't in any group yet. Click on a group's + button to add them.
+            </p>
+            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+              {getUngroupedItems().slice(0, 10).map(item => (
+                <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded text-sm">
+                  <span className="text-lg">{item.category.icon}</span>
+                  <span className="text-white truncate">{item.name}</span>
+                </div>
+              ))}
+              {getUngroupedItems().length > 10 && (
+                <div className="col-span-2 text-center text-gray-400 text-xs">
+                  +{getUngroupedItems().length - 10} more items
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         {groups.length > 0 && (
           <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
@@ -434,7 +585,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
             <div className="text-sm text-gray-300">
               <p>👥 Total Groups: {groups.length}</p>
               <p>📦 Items in Groups: {groups.reduce((sum, group) => sum + getGroupItems(group.id).length, 0)}</p>
-              <p>📋 Ungrouped Items: {items.length - groups.reduce((sum, group) => sum + getGroupItems(group.id).length, 0)}</p>
+              <p>📋 Ungrouped Items: {getUngroupedItems().length}</p>
               <p>🎯 Average Items per Group: {groups.length > 0 ? Math.round(groups.reduce((sum, group) => sum + getGroupItems(group.id).length, 0) / groups.length) : 0}</p>
             </div>
           </div>

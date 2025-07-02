@@ -39,12 +39,14 @@ export type Database = {
           location_image_url: string | null;
           is_starred: boolean;
           has_pin: boolean;
-          pin_code: string | null;
+          pin_code_hash: string | null;
           tags: string[];
           notes: string;
           last_moved_at: string;
           created_at: string;
           updated_at: string;
+          group_id: string | null;
+          container_id: string | null;
         };
         Insert: {
           id?: string;
@@ -57,12 +59,14 @@ export type Database = {
           location_image_url?: string | null;
           is_starred?: boolean;
           has_pin?: boolean;
-          pin_code?: string | null;
+          pin_code_hash?: string | null;
           tags?: string[];
           notes?: string;
           last_moved_at?: string;
           created_at?: string;
           updated_at?: string;
+          group_id?: string | null;
+          container_id?: string | null;
         };
         Update: {
           id?: string;
@@ -75,12 +79,14 @@ export type Database = {
           location_image_url?: string | null;
           is_starred?: boolean;
           has_pin?: boolean;
-          pin_code?: string | null;
+          pin_code_hash?: string | null;
           tags?: string[];
           notes?: string;
           last_moved_at?: string;
           created_at?: string;
           updated_at?: string;
+          group_id?: string | null;
+          container_id?: string | null;
         };
       };
       item_history: {
@@ -175,6 +181,67 @@ export type Database = {
           name?: string;
           image_url?: string | null;
           markers?: any;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      item_groups: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          description: string;
+          color: string;
+          icon: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          description?: string;
+          color?: string;
+          icon?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          description?: string;
+          color?: string;
+          icon?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      virtual_containers: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          parent_id: string | null;
+          level: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          parent_id?: string | null;
+          level?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          parent_id?: string | null;
+          level?: number;
           created_at?: string;
           updated_at?: string;
         };

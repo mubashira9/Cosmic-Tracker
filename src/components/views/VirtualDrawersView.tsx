@@ -15,10 +15,12 @@ interface VirtualDrawersViewProps {
 
 interface Container {
   id: string;
+  user_id: string;
   name: string;
   parent_id: string | null;
   level: number;
   created_at: string;
+  updated_at: string;
 }
 
 export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
@@ -31,10 +33,10 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
   const [containers, setContainers] = useState<Container[]>([]);
   const [expandedContainers, setExpandedContainers] = useState<Set<string>>(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showItemSelector, setShowItemSelector] = useState<string | null>(null);
   const [newContainerName, setNewContainerName] = useState('');
   const [selectedParent, setSelectedParent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [editingContainer, setEditingContainer] = useState<Container | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -43,16 +45,24 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
   }, [user]);
 
   const loadContainers = async () => {
-    // For now, we'll simulate containers with a simple structure
-    // In a real implementation, you'd have a containers table
-    const mockContainers: Container[] = [
-      { id: 'drawer1', name: 'Kitchen Drawer 1', parent_id: null, level: 0, created_at: new Date().toISOString() },
-      { id: 'box1', name: 'Utensil Box', parent_id: 'drawer1', level: 1, created_at: new Date().toISOString() },
-      { id: 'compartment1', name: 'Spoon Section', parent_id: 'box1', level: 2, created_at: new Date().toISOString() },
-      { id: 'drawer2', name: 'Office Drawer 2', parent_id: null, level: 0, created_at: new Date().toISOString() },
-      { id: 'box2', name: 'Electronics Box', parent_id: 'drawer2', level: 1, created_at: new Date().toISOString() },
-    ];
-    setContainers(mockContainers);
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('virtual_containers')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error loading containers:', error);
+        return;
+      }
+
+      setContainers(data || []);
+    } catch (error) {
+      console.error('Error loading containers:', error);
+    }
   };
 
   const createContainer = async () => {
@@ -61,16 +71,30 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
     try {
       setLoading(true);
       
-      // In a real implementation, you'd save to a containers table
-      const newContainer: Container = {
-        id: `container_${Date.now()}`,
-        name: newContainerName.trim(),
-        parent_id: selectedParent,
-        level: selectedParent ? (containers.find(c => c.id === selectedParent)?.level || 0) + 1 : 0,
-        created_at: new Date().toISOString()
-      };
+      const parentLevel = selectedParent 
+        ? (containers.find(c => c.id === selectedParent)?.level || 0) 
+        : 0;
 
-      setContainers(prev => [...prev, newContainer]);
+      const { data, error } = await supabase
+        .from('virtual_containers')
+        .insert([
+          {
+            user_id: user.id,
+            name: newContainerName.trim(),
+            parent_id: selectedParent,
+            level: selectedParent ? parentLevel + 1 : 0,
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating container:', error);
+        alert('Error creating container. Please try again.');
+        return;
+      }
+
+      setContainers(prev => [...prev, data]);
       setNewContainerName('');
       setSelectedParent(null);
       setShowAddForm(false);
@@ -90,15 +114,84 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
     try {
       setLoading(true);
       
-      // Remove container and update items
+      // First, update items to remove container_id
+      const { error: itemsError } = await supabase
+        .from('items')
+        .update({ container_id: null })
+        .eq('container_id', containerId);
+
+      if (itemsError) {
+        console.error('Error updating items:', itemsError);
+        alert('Error updating items. Please try again.');
+        return;
+      }
+
+      // Then delete the container
+      const { error } = await supabase
+        .from('virtual_containers')
+        .delete()
+        .eq('id', containerId);
+
+      if (error) {
+        console.error('Error deleting container:', error);
+        alert('Error deleting container. Please try again.');
+        return;
+      }
+
       setContainers(prev => prev.filter(c => c.id !== containerId));
-      
-      // In a real implementation, you'd update items in the database
-      // For now, we'll just reload items
       onItemsUpdated();
     } catch (error) {
       console.error('Error deleting container:', error);
       alert('Error deleting container. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addItemToContainer = async (itemId: string, containerId: string) => {
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from('items')
+        .update({ container_id: containerId })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error adding item to container:', error);
+        alert('Error adding item to container. Please try again.');
+        return;
+      }
+
+      onItemsUpdated();
+      setShowItemSelector(null);
+    } catch (error) {
+      console.error('Error adding item to container:', error);
+      alert('Error adding item to container. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeItemFromContainer = async (itemId: string) => {
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from('items')
+        .update({ container_id: null })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error removing item from container:', error);
+        alert('Error removing item from container. Please try again.');
+        return;
+      }
+
+      onItemsUpdated();
+    } catch (error) {
+      console.error('Error removing item from container:', error);
+      alert('Error removing item from container. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -117,14 +210,11 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
   };
 
   const getContainerItems = (containerId: string) => {
-    // In a real implementation, items would have a container_id field
-    // For now, we'll simulate by checking if location contains container name
-    const container = containers.find(c => c.id === containerId);
-    if (!container) return [];
-    
-    return items.filter(item => 
-      item.location.toLowerCase().includes(container.name.toLowerCase())
-    );
+    return items.filter(item => item.container_id === containerId);
+  };
+
+  const getUncontainedItems = () => {
+    return items.filter(item => !item.container_id);
   };
 
   const getChildContainers = (parentId: string | null) => {
@@ -185,11 +275,11 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
               </button>
               
               <button
-                onClick={() => setEditingContainer(container)}
+                onClick={() => setShowItemSelector(container.id)}
                 className="p-1 hover:bg-gray-700 rounded transition-colors text-blue-400"
-                title="Edit container"
+                title="Add items"
               >
-                <Edit className="w-4 h-4" />
+                <Package className="w-4 h-4" />
               </button>
               
               <button
@@ -206,7 +296,7 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
           {isExpanded && containerItems.length > 0 && (
             <div className="mt-3 space-y-2">
               {containerItems.map(item => (
-                <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-800/50 rounded-lg">
+                <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-800/50 rounded-lg group">
                   {item.item_image_url ? (
                     <div className="w-8 h-8 rounded overflow-hidden border border-gray-600 flex-shrink-0">
                       <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
@@ -220,6 +310,13 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
                     <p className="text-sm text-white truncate">{item.name}</p>
                     <p className="text-xs text-gray-400 truncate">{item.location}</p>
                   </div>
+                  <button
+                    onClick={() => removeItemFromContainer(item.id)}
+                    className="p-1 hover:bg-gray-700 rounded transition-colors text-red-400 opacity-0 group-hover:opacity-100"
+                    title="Remove from container"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -340,6 +437,53 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
           </div>
         )}
 
+        {/* Item Selector Modal */}
+        {showItemSelector && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-500/30 max-w-md w-full max-h-96 overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-purple-300">Add Items to Container</h3>
+                <button
+                  onClick={() => setShowItemSelector(null)}
+                  className="p-1 hover:bg-gray-700 rounded"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+              
+              <div className="space-y-2">
+                {getUncontainedItems().map(item => (
+                  <div
+                    key={item.id}
+                    onClick={() => addItemToContainer(item.id, showItemSelector)}
+                    className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-600/50 hover:border-purple-400/50 cursor-pointer transition-all"
+                  >
+                    {item.item_image_url ? (
+                      <div className="w-10 h-10 rounded overflow-hidden border border-gray-600 flex-shrink-0">
+                        <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg">{item.category.icon}</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">{item.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{item.location}</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {getUncontainedItems().length === 0 && (
+                  <p className="text-gray-400 text-center py-4">
+                    All items are already in containers
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Containers List */}
         <div className="space-y-4">
           {rootContainers.length === 0 ? (
@@ -365,6 +509,29 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
           )}
         </div>
 
+        {/* Uncontained Items */}
+        {getUncontainedItems().length > 0 && (
+          <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30">
+            <h3 className="text-lg font-semibold text-yellow-300 mb-3">Uncontained Items ({getUncontainedItems().length})</h3>
+            <p className="text-gray-300 text-sm mb-3">
+              These items aren't in any container yet. Click on a container's package icon to add them.
+            </p>
+            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+              {getUncontainedItems().slice(0, 10).map(item => (
+                <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded text-sm">
+                  <span className="text-lg">{item.category.icon}</span>
+                  <span className="text-white truncate">{item.name}</span>
+                </div>
+              ))}
+              {getUncontainedItems().length > 10 && (
+                <div className="col-span-2 text-center text-gray-400 text-xs">
+                  +{getUncontainedItems().length - 10} more items
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         {containers.length > 0 && (
           <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
@@ -372,8 +539,8 @@ export const VirtualDrawersView: React.FC<VirtualDrawersViewProps> = ({
             <div className="text-sm text-gray-300">
               <p>📦 Total Containers: {containers.length}</p>
               <p>🗂️ Root Containers: {rootContainers.length}</p>
-              <p>📁 Nested Levels: {Math.max(...containers.map(c => c.level)) + 1}</p>
-              <p>📋 Items Organized: {items.length}</p>
+              <p>📁 Nested Levels: {containers.length > 0 ? Math.max(...containers.map(c => c.level)) + 1 : 0}</p>
+              <p>📋 Items Organized: {containers.reduce((sum, container) => sum + getContainerItems(container.id).length, 0)}</p>
             </div>
           </div>
         )}
