@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock, Map } from 'lucide-react';
+import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock, Map, Archive, Users, Camera, Route } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StarField } from '../ui/StarField';
 import type { Item, ItemReminder } from '../SpaceTracker';
@@ -61,7 +61,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <Globe className="w-8 h-8 text-slate-400 animate-spin" style={{animationDuration: '10s'}} />
             <h1 className="text-2xl font-bold text-white drop-shadow-lg">
               <span className="text-slate-400">Cosmic</span>{' '}
-              <span className="text-gray-400">Tracker</span>
+              <span className="text-white">Tracker</span>
             </h1>
           </div>
           <p className="text-sm text-gray-300">Welcome back, {user?.email}</p>
@@ -129,7 +129,39 @@ export const HomeView: React.FC<HomeViewProps> = ({
             className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl font-medium hover:from-blue-500 hover:to-indigo-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
           >
             <Map className="w-6 h-6" />
-            <span className="text-sm">Visual Map</span>
+            <span className="text-sm">Visual Maps</span>
+          </button>
+
+          <button
+            onClick={() => onViewChange('virtual-drawers')}
+            className="p-4 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl font-medium hover:from-purple-500 hover:to-violet-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+          >
+            <Archive className="w-6 h-6" />
+            <span className="text-sm">Virtual Drawers</span>
+          </button>
+
+          <button
+            onClick={() => onViewChange('groups')}
+            className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl font-medium hover:from-emerald-500 hover:to-teal-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+          >
+            <Users className="w-6 h-6" />
+            <span className="text-sm">Item Groups</span>
+          </button>
+
+          <button
+            onClick={() => onViewChange('virtual-tour')}
+            className="p-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-medium hover:from-cyan-500 hover:to-blue-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+          >
+            <Route className="w-6 h-6" />
+            <span className="text-sm">Virtual Tour</span>
+          </button>
+
+          <button
+            onClick={() => onViewChange('photo-search')}
+            className="p-4 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl font-medium hover:from-pink-500 hover:to-rose-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+          >
+            <Camera className="w-6 h-6" />
+            <span className="text-sm">Photo Search</span>
           </button>
 
           <button

@@ -13,6 +13,10 @@ import { HistoryView } from './views/HistoryView';
 import { RemindersView } from './views/RemindersView';
 import { SettingsView } from './views/SettingsView';
 import { VisualMapView } from './views/VisualMapView';
+import { VirtualDrawersView } from './views/VirtualDrawersView';
+import { GroupsView } from './views/GroupsView';
+import { VirtualTourView } from './views/VirtualTourView';
+import { PhotoSearchView } from './views/PhotoSearchView';
 import { Help } from './Help';
 import { PinPrompt } from './ui/PinPrompt';
 import { StarField } from './ui/StarField';
@@ -44,6 +48,8 @@ export type NewItem = {
   notes: string;
   expiryDate: string;
   reminderDaysBefore: number;
+  containerId?: string;
+  groupId?: string;
 };
 
 export const categories = [
@@ -358,6 +364,48 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
             user={user}
             selectedItem={selectedItemForMap}
             onSelectedItemChange={setSelectedItemForMap}
+          />
+        );
+
+      case 'virtual-drawers':
+        return (
+          <VirtualDrawersView
+            items={items}
+            onBack={() => handleViewChange('home')}
+            onSignOut={handleSignOut}
+            user={user}
+            onItemsUpdated={loadItems}
+          />
+        );
+
+      case 'groups':
+        return (
+          <GroupsView
+            items={items}
+            onBack={() => handleViewChange('home')}
+            onSignOut={handleSignOut}
+            user={user}
+            onItemsUpdated={loadItems}
+          />
+        );
+
+      case 'virtual-tour':
+        return (
+          <VirtualTourView
+            items={items}
+            onBack={() => handleViewChange('home')}
+            onSignOut={handleSignOut}
+            user={user}
+          />
+        );
+
+      case 'photo-search':
+        return (
+          <PhotoSearchView
+            items={items}
+            onBack={() => handleViewChange('home')}
+            onSignOut={handleSignOut}
+            onItemClick={handleItemClick}
           />
         );
       

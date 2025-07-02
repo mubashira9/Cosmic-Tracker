@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Globe, Package, Plus, Search, Star, Lock, Tag, Camera, MapPin, History, FileText, Mail, Rocket, Map } from 'lucide-react';
+import { X, Globe, Package, Plus, Search, Star, Lock, Tag, Camera, MapPin, History, FileText, Mail, Rocket, Map, Archive, Users, Route } from 'lucide-react';
 
 interface HelpProps {
   onClose: () => void;
@@ -41,7 +41,7 @@ export const Help: React.FC<HelpProps> = ({ onClose }) => {
           <h1 className="text-2xl font-bold flex items-center gap-2 text-white drop-shadow-lg">
             <Globe className="w-7 h-7 text-slate-400" />
             <span className="text-slate-400">Mission</span>{' '}
-            <span className="text-gray-400">Control</span>{' '}
+            <span className="text-white">Control</span>{' '}
             <span className="text-white">Guide</span>
           </h1>
           <div className="w-9 h-9" /> {/* Spacer */}
@@ -131,6 +131,38 @@ export const Help: React.FC<HelpProps> = ({ onClose }) => {
               </div>
 
               <div className="flex items-start gap-3">
+                <Archive className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-slate-400">Virtual Drawers & Boxes</h3>
+                  <p className="text-gray-300 text-sm">Create nested containers like "Drawer 2 → Box A → USB drives" for micro-organization.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Users className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-slate-400">Item Groups</h3>
+                  <p className="text-gray-300 text-sm">Group related items together into collections or repositories for better organization.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Route className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-slate-400">Virtual Tour</h3>
+                  <p className="text-gray-300 text-sm">Take a virtual walk through your rooms and storage spaces to visualize your inventory.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Camera className="w-5 h-5 text-pink-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-slate-400">Photo Search</h3>
+                  <p className="text-gray-300 text-sm">Search for items by uploading a photo and matching it with your inventory images.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
                 <History className="w-5 h-5 text-green-400 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-slate-400">Activity History</h3>
@@ -167,6 +199,14 @@ export const Help: React.FC<HelpProps> = ({ onClose }) => {
               <div className="flex items-start gap-3">
                 <span className="text-green-400">•</span>
                 <p><strong>Use Visual Maps:</strong> Upload floor plans and mark item locations for a visual overview of your storage spaces.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-green-400">•</span>
+                <p><strong>Create Virtual Containers:</strong> Use drawers and boxes to organize small items within larger storage areas.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-green-400">•</span>
+                <p><strong>Group Related Items:</strong> Create collections for related items like "Photography Equipment" or "Kitchen Gadgets".</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-green-400">•</span>
