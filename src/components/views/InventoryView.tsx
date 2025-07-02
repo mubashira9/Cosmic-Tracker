@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Package, LogOut, Star, Lock, MapPin, X, Edit, Map } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { ThemedBackground } from '../ui/ThemedBackground';
+import { StarField } from '../ui/StarField';
 import type { Item } from '../SpaceTracker';
 
 interface InventoryViewProps {
@@ -32,7 +31,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterTag, setFilterTag] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const { currentTheme } = useTheme();
 
   const getAllTags = () => {
     const allTags = new Set<string>();
@@ -55,16 +53,18 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   });
 
   return (
-    <ThemedBackground>
-      <div className="p-4 max-w-md mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+      <StarField />
+      
+      <div className="relative z-10 p-4 max-w-md mx-auto">
         <div className="flex items-center justify-between mb-6 pt-4">
           <button
             onClick={onBack}
-            className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
+            className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30"
           >
             ← Back to Command Center
           </button>
-          <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
+          <h1 className="text-xl font-bold flex items-center gap-2 text-slate-400">
             <Package className="w-6 h-6" />
             Inventory
           </h1>
@@ -79,23 +79,23 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
         <div className="space-y-4 mb-6">
           <div className="relative">
-            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${currentTheme.colors.textSecondary}`} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search your cosmic inventory..."
-              className={`w-full pl-10 pr-4 py-3 ${currentTheme.gradients.card} border border-${currentTheme.colors.border} rounded-xl text-${currentTheme.colors.text} placeholder-${currentTheme.colors.textSecondary} focus:border-${currentTheme.colors.primary} focus:outline-none`}
+              className="w-full pl-10 pr-4 py-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white placeholder-gray-400 focus:border-slate-400 focus:outline-none backdrop-blur-sm"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>Category</label>
+              <label className="block text-sm font-medium mb-2 text-slate-400">Category</label>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className={`w-full p-3 ${currentTheme.gradients.card} border border-${currentTheme.colors.border} rounded-xl text-${currentTheme.colors.text} focus:border-${currentTheme.colors.primary} focus:outline-none text-sm`}
+                className="w-full p-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white focus:border-slate-400 focus:outline-none text-sm backdrop-blur-sm"
               >
                 <option value="all">🌌 All</option>
                 {categories.map(cat => (
@@ -107,11 +107,11 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-2 text-${currentTheme.colors.primary}`}>Tags</label>
+              <label className="block text-sm font-medium mb-2 text-slate-400">Tags</label>
               <select
                 value={filterTag}
                 onChange={(e) => setFilterTag(e.target.value)}
-                className={`w-full p-3 ${currentTheme.gradients.card} border border-${currentTheme.colors.border} rounded-xl text-${currentTheme.colors.text} focus:border-${currentTheme.colors.primary} focus:outline-none text-sm`}
+                className="w-full p-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white focus:border-slate-400 focus:outline-none text-sm backdrop-blur-sm"
               >
                 <option value="all">🏷️ All Tags</option>
                 {getAllTags().map(tag => (
@@ -127,8 +127,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         <div className="space-y-4">
           {filteredItems.length === 0 ? (
             <div className="text-center py-12">
-              <Package className={`w-16 h-16 text-${currentTheme.colors.textSecondary} mx-auto mb-4`} />
-              <p className={`text-${currentTheme.colors.textSecondary}`}>
+              <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-400">
                 {items.length === 0 
                   ? "Your cosmic inventory is empty. Start by adding your first item!"
                   : "No items found matching your search or filter."
@@ -141,7 +141,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 {/* Compact View */}
                 <div
                   onClick={() => onItemClick(item)}
-                  className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border} hover:border-${currentTheme.colors.primary}/50 transition-all cursor-pointer`}
+                  className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-slate-400/50 transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     {/* Show lock icon for PIN-protected items, otherwise show image or category icon */}
@@ -161,23 +161,23 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className={`font-semibold text-${currentTheme.colors.primary} truncate`}>{item.name}</h3>
+                        <h3 className="font-semibold text-slate-400 truncate">{item.name}</h3>
                         {item.is_starred && <Star className="w-4 h-4 text-yellow-400 fill-current flex-shrink-0" />}
                         {item.has_pin && <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />}
                       </div>
-                      <p className={`text-sm text-${currentTheme.colors.textSecondary} truncate`}>{item.location}</p>
+                      <p className="text-sm text-gray-300 truncate">{item.location}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Expanded View */}
                 {expandedItem === item.id && (item.has_pin ? unlockedItems.has(item.id) : true) && (
-                  <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.primary}/50 ml-4`}>
+                  <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 ml-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>{item.category.name}</p>
-                          <div className={`flex items-center gap-2 text-${currentTheme.colors.secondary} mt-1`}>
+                          <p className="text-sm text-gray-300">{item.category.name}</p>
+                          <div className="flex items-center gap-2 text-gray-400 mt-1">
                             <MapPin className="w-4 h-4" />
                             <span className="font-medium">{item.location}</span>
                           </div>
@@ -189,7 +189,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                                 e.stopPropagation();
                                 onViewOnMap(item);
                               }}
-                              className={`p-1 hover:bg-gray-700 rounded text-${currentTheme.colors.primary} hover:text-${currentTheme.colors.secondary}`}
+                              className="p-1 hover:bg-gray-700 rounded text-slate-400 hover:text-gray-300"
                               title="View on Map"
                             >
                               <Map className="w-4 h-4" />
@@ -200,7 +200,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                               e.stopPropagation();
                               onEditItem(item);
                             }}
-                            className={`p-1 hover:bg-gray-700 rounded text-${currentTheme.colors.primary} hover:text-${currentTheme.colors.secondary}`}
+                            className="p-1 hover:bg-gray-700 rounded text-slate-400 hover:text-gray-300"
                             title="Edit Item"
                           >
                             <Edit className="w-4 h-4" />
@@ -212,26 +212,26 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                             }}
                             className="p-1 hover:bg-gray-700 rounded"
                           >
-                            <X className={`w-4 h-4 text-${currentTheme.colors.textSecondary}`} />
+                            <X className="w-4 h-4 text-gray-400" />
                           </button>
                         </div>
                       </div>
 
                       {item.description && (
-                        <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>{item.description}</p>
+                        <p className="text-sm text-gray-300">{item.description}</p>
                       )}
 
                       {item.notes && (
                         <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-600">
-                          <p className={`text-xs text-${currentTheme.colors.textSecondary} mb-1`}>Notes:</p>
-                          <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>{item.notes}</p>
+                          <p className="text-xs text-gray-400 mb-1">Notes:</p>
+                          <p className="text-sm text-gray-300">{item.notes}</p>
                         </div>
                       )}
 
                       {item.tags && item.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {item.tags.map(tag => (
-                            <span key={tag} className={`px-2 py-1 bg-${currentTheme.colors.secondary}/30 rounded-full text-xs text-${currentTheme.colors.secondary}`}>
+                            <span key={tag} className="px-2 py-1 bg-gray-400/30 rounded-full text-xs text-gray-300">
                               #{tag}
                             </span>
                           ))}
@@ -253,7 +253,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </div>
                       )}
 
-                      <div className={`text-xs text-${currentTheme.colors.textSecondary}`}>
+                      <div className="text-xs text-gray-400">
                         📅 Added: {new Date(item.created_at).toLocaleDateString()}
                         {item.updated_at !== item.created_at && (
                           <span className="ml-2">
@@ -270,9 +270,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         </div>
 
         {items.length > 0 && (
-          <div className={`mt-8 ${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-            <h3 className={`text-sm font-medium text-${currentTheme.colors.primary} mb-2`}>Mission Stats</h3>
-            <div className={`text-sm text-${currentTheme.colors.textSecondary}`}>
+          <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+            <h3 className="text-sm font-medium text-slate-400 mb-2">Mission Stats</h3>
+            <div className="text-sm text-gray-300">
               <p>🚀 Total Items: {items.length}</p>
               <p>⭐ Starred Items: {items.filter(item => item.is_starred).length}</p>
               <p>🔒 Secured Items: {items.filter(item => item.has_pin).length}</p>
@@ -282,6 +282,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
         )}
       </div>
-    </ThemedBackground>
+    </div>
   );
 };

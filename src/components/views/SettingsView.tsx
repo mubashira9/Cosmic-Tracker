@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Settings, LogOut, FileText, Download, User, Database, Trash2, AlertTriangle, Palette, Check } from 'lucide-react';
+import { Settings, LogOut, FileText, Download, User, Database, Trash2, AlertTriangle } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import jsPDF from 'jspdf';
 import { supabase } from '../../lib/supabase';
-import { useTheme } from '../../contexts/ThemeContext';
-import { ThemedBackground } from '../ui/ThemedBackground';
+import { StarField } from '../ui/StarField';
 import type { Item } from '../SpaceTracker';
 
 interface SettingsViewProps {
@@ -22,7 +21,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const { currentTheme, setTheme, themes } = useTheme();
 
   const exportToPDF = () => {
     setLoading(true);
@@ -202,16 +200,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   return (
-    <ThemedBackground>
-      <div className="p-4 max-w-md mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+      <StarField />
+      
+      <div className="relative z-10 p-4 max-w-md mx-auto">
         <div className="flex items-center justify-between mb-6 pt-4">
           <button
             onClick={onBack}
-            className={`p-2 rounded-full bg-${currentTheme.colors.secondary}/20 hover:bg-${currentTheme.colors.secondary}/30 transition-colors border border-${currentTheme.colors.border}`}
+            className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30"
           >
             ← Back to Command Center
           </button>
-          <h1 className={`text-xl font-bold flex items-center gap-2 text-${currentTheme.colors.primary}`}>
+          <h1 className="text-xl font-bold flex items-center gap-2 text-slate-400">
             <Settings className="w-6 h-6" />
             Settings
           </h1>
@@ -225,84 +225,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         <div className="space-y-6">
-          {/* Theme Selection */}
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
-              <Palette className="w-5 h-5" />
-              Theme Selection
-            </h2>
-            <p className={`text-${currentTheme.colors.textSecondary} text-sm mb-4`}>
-              Choose your preferred cosmic theme to personalize your experience.
-            </p>
-            
-            <div className="grid grid-cols-1 gap-3">
-              {themes.map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => setTheme(theme.id)}
-                  className={`relative p-4 rounded-lg border-2 transition-all text-left ${
-                    currentTheme.id === theme.id
-                      ? `border-${currentTheme.colors.primary} bg-${currentTheme.colors.primary}/10`
-                      : `border-${currentTheme.colors.border} hover:border-${currentTheme.colors.primary}/50 bg-gray-800/30`
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className={`font-semibold text-${currentTheme.colors.text} mb-1`}>
-                        {theme.name}
-                      </h3>
-                      <p className={`text-sm text-${currentTheme.colors.textSecondary}`}>
-                        {theme.description}
-                      </p>
-                    </div>
-                    {currentTheme.id === theme.id && (
-                      <Check className={`w-5 h-5 text-${currentTheme.colors.primary}`} />
-                    )}
-                  </div>
-                  
-                  {/* Theme Preview */}
-                  <div className="mt-3 flex gap-2">
-                    <div className={`w-4 h-4 rounded-full bg-${theme.colors.primary}`}></div>
-                    <div className={`w-4 h-4 rounded-full bg-${theme.colors.secondary}`}></div>
-                    <div className={`w-4 h-4 rounded-full bg-${theme.colors.accent}`}></div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Account Info */}
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+            <h2 className="text-lg font-semibold text-slate-400 mb-3 flex items-center gap-2">
               <User className="w-5 h-5" />
               Account Information
             </h2>
             <div className="space-y-2 text-sm">
-              <p className={`text-${currentTheme.colors.textSecondary}`}>
-                <span className={`text-${currentTheme.colors.primary}`}>Email:</span> {user?.email}
+              <p className="text-gray-300">
+                <span className="text-slate-400">Email:</span> {user?.email}
               </p>
-              <p className={`text-${currentTheme.colors.textSecondary}`}>
-                <span className={`text-${currentTheme.colors.primary}`}>User ID:</span> {user?.id}
+              <p className="text-gray-300">
+                <span className="text-slate-400">User ID:</span> {user?.id}
               </p>
-              <p className={`text-${currentTheme.colors.textSecondary}`}>
-                <span className={`text-${currentTheme.colors.primary}`}>Account Created:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+              <p className="text-gray-300">
+                <span className="text-slate-400">Account Created:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
               </p>
             </div>
           </div>
 
           {/* Data Export */}
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+            <h2 className="text-lg font-semibold text-slate-400 mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5" />
               Data Export
             </h2>
-            <p className={`text-${currentTheme.colors.textSecondary} text-sm mb-4`}>
+            <p className="text-gray-300 text-sm mb-4">
               Export your complete inventory as a PDF document for backup or sharing purposes.
             </p>
             <button
               onClick={exportToPDF}
               disabled={loading || items.length === 0}
-              className={`w-full p-3 ${currentTheme.gradients.button} rounded-lg font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white`}
+              className="w-full p-3 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -316,27 +270,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* Data Statistics */}
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3 flex items-center gap-2`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+            <h2 className="text-lg font-semibold text-slate-400 mb-3 flex items-center gap-2">
               <Database className="w-5 h-5" />
               Data Statistics
             </h2>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                <p className={`text-2xl font-bold text-${currentTheme.colors.primary}`}>{items.length}</p>
-                <p className={`text-${currentTheme.colors.textSecondary}`}>Total Items</p>
+                <p className="text-2xl font-bold text-slate-400">{items.length}</p>
+                <p className="text-gray-300">Total Items</p>
               </div>
               <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                 <p className="text-2xl font-bold text-yellow-400">{items.filter(item => item.is_starred).length}</p>
-                <p className={`text-${currentTheme.colors.textSecondary}`}>Starred</p>
+                <p className="text-gray-300">Starred</p>
               </div>
               <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                 <p className="text-2xl font-bold text-red-400">{items.filter(item => item.has_pin).length}</p>
-                <p className={`text-${currentTheme.colors.textSecondary}`}>Secured</p>
+                <p className="text-gray-300">Secured</p>
               </div>
               <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                <p className={`text-2xl font-bold text-${currentTheme.colors.secondary}`}>{new Set(items.flatMap(item => item.tags || [])).size}</p>
-                <p className={`text-${currentTheme.colors.textSecondary}`}>Unique Tags</p>
+                <p className="text-2xl font-bold text-gray-400">{new Set(items.flatMap(item => item.tags || [])).size}</p>
+                <p className="text-gray-300">Unique Tags</p>
               </div>
             </div>
           </div>
@@ -397,18 +351,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* App Info */}
-          <div className={`${currentTheme.gradients.card} rounded-xl p-4 border border-${currentTheme.colors.border}`}>
-            <h2 className={`text-lg font-semibold text-${currentTheme.colors.primary} mb-3`}>About Cosmic Tracker</h2>
-            <div className={`text-sm text-${currentTheme.colors.textSecondary} space-y-2`}>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+            <h2 className="text-lg font-semibold text-slate-400 mb-3">About Cosmic Tracker</h2>
+            <div className="text-sm text-gray-300 space-y-2">
               <p>Version: 1.0.0</p>
               <p>Your personal space inventory management system</p>
-              <p className={`text-xs text-${currentTheme.colors.textSecondary} mt-4`}>
-                For support, contact: <span className={`text-${currentTheme.colors.primary}`}>shaikmubashira2006@gmail.com</span>
+              <p className="text-xs text-gray-400 mt-4">
+                For support, contact: <span className="text-slate-400">shaikmubashira2006@gmail.com</span>
               </p>
             </div>
           </div>
         </div>
       </div>
-    </ThemedBackground>
+    </div>
   );
 };
