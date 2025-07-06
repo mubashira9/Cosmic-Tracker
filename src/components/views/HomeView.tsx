@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock, Map, Archive, Users, Camera, Route } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { StarField } from '../ui/StarField';
+import { SpaceBackground } from '../ui/SpaceBackground';
+import { SpaceButton } from '../ui/SpaceButton';
+import { SpacePanel } from '../ui/SpacePanel';
+import { CrewmateIcon, FloatingCrewmate } from '../ui/CrewmateIcon';
 import type { Item, ItemReminder } from '../SpaceTracker';
 
 interface HomeViewProps {
@@ -52,25 +55,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
-      <StarField />
+    <SpaceBackground variant="starfield">
+      {/* Floating crewmates */}
+      <FloatingCrewmate color="blue" className="top-16 left-8" />
+      <FloatingCrewmate color="green" className="top-24 right-12" />
+      <FloatingCrewmate color="red" className="bottom-32 left-16" />
+      <FloatingCrewmate color="yellow" className="bottom-20 right-8" />
+      <FloatingCrewmate color="purple" className="top-1/2 left-4" />
       
-      <div className="relative z-10 p-4 max-w-md mx-auto">
+      <div className="p-4 max-w-md mx-auto">
         <div className="text-center mb-6 pt-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Globe className="w-8 h-8 text-slate-400 animate-spin" style={{animationDuration: '10s'}} />
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Globe className="w-8 h-8 text-cyan-400 animate-spin" style={{animationDuration: '10s'}} />
             <h1 className="text-2xl font-bold text-white drop-shadow-lg">
-              <span className="text-slate-400">Cosmic</span>{' '}
+              <span className="text-cyan-400">Cosmic</span>{' '}
               <span className="text-white">Tracker</span>
             </h1>
+            <CrewmateIcon color="cyan" size="md" />
           </div>
-          <p className="text-sm text-gray-300">Welcome back, {user?.email}</p>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CrewmateIcon color="blue" size="sm" />
+            <p className="text-sm text-gray-300">Welcome back, {user?.email}</p>
+            <CrewmateIcon color="green" size="sm" />
+          </div>
           <button
             onClick={onSignOut}
             className="mt-2 px-3 py-1 bg-red-600/20 border border-red-500/50 rounded-full text-red-300 hover:bg-red-600/30 transition-colors text-xs flex items-center gap-1 mx-auto"
           >
             <LogOut className="w-3 h-3" />
             Sign Out
+            <CrewmateIcon color="red" size="sm" />
           </button>
         </div>
 
@@ -81,134 +95,162 @@ export const HomeView: React.FC<HomeViewProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Quick search across the galaxy..."
-            className="w-full pl-10 pr-4 py-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white placeholder-gray-400 focus:border-slate-400 focus:outline-none backdrop-blur-sm"
+            className="w-full pl-10 pr-12 py-3 bg-black/40 border border-cyan-400/30 rounded-xl text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none backdrop-blur-sm"
           />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <CrewmateIcon color="cyan" size="sm" />
+          </div>
         </div>
 
         {/* Upcoming Reminders Alert */}
         {upcomingReminders.length > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-orange-600/20 to-red-600/20 backdrop-blur-sm rounded-xl p-4 border border-orange-500/50">
+          <SpacePanel variant="warning" className="mb-6 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Bell className="w-5 h-5 text-orange-400" />
               <h3 className="font-semibold text-orange-300">Upcoming Expiries!</h3>
+              <CrewmateIcon color="orange" size="sm" animate />
             </div>
             <p className="text-sm text-orange-200 mb-2">
               {upcomingReminders.length} item{upcomingReminders.length > 1 ? 's' : ''} expiring soon
             </p>
-            <button
+            <SpaceButton
               onClick={() => onViewChange('reminders')}
-              className="text-xs bg-orange-500/30 hover:bg-orange-500/50 px-3 py-1 rounded-full text-orange-200 transition-colors"
+              variant="danger"
+              size="sm"
             >
               View Reminders →
-            </button>
-          </div>
+            </SpaceButton>
+          </SpacePanel>
         )}
 
         <div className="space-y-4 mb-6">
-          <button
+          <SpaceButton
             onClick={() => onViewChange('add')}
-            className="w-full p-4 bg-gradient-to-r from-slate-500 to-gray-600 rounded-xl font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="w-full"
           >
             <Plus className="w-5 h-5" />
             Add New Item to Inventory
-          </button>
+            <CrewmateIcon color="green" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('inventory')}
-            className="w-full p-4 bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl font-medium hover:from-gray-500 hover:to-slate-500 transition-all flex items-center justify-center gap-2 shadow-lg text-white"
+            variant="secondary"
+            className="w-full"
           >
             <Package className="w-5 h-5" />
             View Full Inventory ({items.length} items)
-          </button>
+            <CrewmateIcon color="blue" size="sm" />
+          </SpaceButton>
         </div>
 
         {/* Navigation Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <button
+          <SpaceButton
             onClick={() => onViewChange('visual-map')}
-            className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl font-medium hover:from-blue-500 hover:to-indigo-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <Map className="w-6 h-6" />
             <span className="text-sm">Visual Maps</span>
-          </button>
+            <CrewmateIcon color="cyan" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('virtual-drawers')}
-            className="p-4 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl font-medium hover:from-purple-500 hover:to-violet-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <Archive className="w-6 h-6" />
             <span className="text-sm">Virtual Drawers</span>
-          </button>
+            <CrewmateIcon color="purple" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('groups')}
-            className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl font-medium hover:from-emerald-500 hover:to-teal-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <Users className="w-6 h-6" />
             <span className="text-sm">Item Groups</span>
-          </button>
+            <CrewmateIcon color="green" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('virtual-tour')}
-            className="p-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-medium hover:from-cyan-500 hover:to-blue-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <Route className="w-6 h-6" />
             <span className="text-sm">Virtual Tour</span>
-          </button>
+            <CrewmateIcon color="yellow" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('photo-search')}
-            className="p-4 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl font-medium hover:from-pink-500 hover:to-rose-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <Camera className="w-6 h-6" />
             <span className="text-sm">Photo Search</span>
-          </button>
+            <CrewmateIcon color="pink" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('reminders')}
-            className="p-4 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl font-medium hover:from-orange-500 hover:to-red-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex flex-col items-center gap-2 relative"
           >
             <Bell className="w-6 h-6" />
             <span className="text-sm">Reminders</span>
+            <CrewmateIcon color="orange" size="sm" />
             {upcomingReminders.length > 0 && (
-              <span className="bg-white text-red-600 text-xs px-2 py-1 rounded-full font-bold">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                 {upcomingReminders.length}
               </span>
             )}
-          </button>
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('history')}
-            className="p-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-medium hover:from-green-500 hover:to-teal-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="secondary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <History className="w-6 h-6" />
             <span className="text-sm">History</span>
-          </button>
+            <CrewmateIcon color="blue" size="sm" />
+          </SpaceButton>
 
-          <button
+          <SpaceButton
             onClick={() => onViewChange('settings')}
-            className="p-4 bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl font-medium hover:from-gray-500 hover:to-slate-500 transition-all flex flex-col items-center gap-2 shadow-lg text-white"
+            variant="secondary"
+            className="p-4 flex flex-col items-center gap-2"
           >
             <Settings className="w-6 h-6" />
             <span className="text-sm">Settings</span>
-          </button>
+            <CrewmateIcon color="gray" size="sm" />
+          </SpaceButton>
         </div>
 
         <div className="grid grid-cols-1 gap-4 mb-6">
-          <button
+          <SpaceButton
             onClick={() => onViewChange('help')}
-            className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-medium hover:from-purple-500 hover:to-pink-500 transition-all flex items-center justify-center gap-2 shadow-lg text-white"
+            variant="primary"
+            className="p-4 flex items-center justify-center gap-2"
           >
             <HelpCircle className="w-6 h-6" />
             <span className="text-sm">Help & Guide</span>
-          </button>
+            <CrewmateIcon color="cyan" size="sm" />
+          </SpaceButton>
         </div>
 
         {searchTerm && (
-          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 mb-6">
-            <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+          <SpacePanel variant="control" className="p-4 mb-6">
+            <h3 className="text-sm font-medium text-cyan-400 mb-3 flex items-center gap-2">
               <Search className="w-4 h-4" />
               Quick Search Results
+              <CrewmateIcon color="cyan" size="sm" />
             </h3>
             {filteredItems.length === 0 ? (
               <p className="text-gray-400 text-sm">No items found matching "{searchTerm}"</p>
@@ -236,11 +278,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <span className="text-slate-400 text-sm truncate">{item.name}</span>
+                        <span className="text-cyan-400 text-sm truncate">{item.name}</span>
                         {item.is_starred && <Star className="w-3 h-3 text-yellow-400 fill-current flex-shrink-0" />}
                         {item.has_pin && <Lock className="w-3 h-3 text-red-400 flex-shrink-0" />}
                       </div>
                     </div>
+                    <CrewmateIcon color="blue" size="sm" />
                   </div>
                 ))}
                 {filteredItems.length > 3 && (
@@ -248,7 +291,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     +{filteredItems.length - 3} more results. 
                     <button 
                       onClick={() => onViewChange('inventory')}
-                      className="text-slate-400 hover:text-gray-300 ml-1"
+                      className="text-cyan-400 hover:text-cyan-300 ml-1"
                     >
                       View all →
                     </button>
@@ -256,12 +299,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 )}
               </div>
             )}
-          </div>
+          </SpacePanel>
         )}
 
         {items.length > 0 && !searchTerm && (
-          <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
-            <h3 className="text-sm font-medium text-slate-400 mb-2">Mission Stats</h3>
+          <SpacePanel variant="default" className="mt-8 p-4">
+            <h3 className="text-sm font-medium text-cyan-400 mb-2 flex items-center gap-2">
+              Mission Stats
+              <CrewmateIcon color="cyan" size="sm" />
+            </h3>
             <div className="text-sm text-gray-300">
               <p>🚀 Total Items: {items.length}</p>
               <p>⭐ Starred Items: {items.filter(item => item.is_starred).length}</p>
@@ -269,9 +315,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <p>🏷️ Total Tags: {getAllTags().length}</p>
               <p>⏰ Active Reminders: {reminders.filter(r => r.is_active).length}</p>
             </div>
-          </div>
+          </SpacePanel>
         )}
       </div>
-    </div>
+    </SpaceBackground>
   );
 };
