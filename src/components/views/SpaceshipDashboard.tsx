@@ -27,7 +27,7 @@ interface RoomProps {
   onClick: () => void;
   badge?: number;
   crewmateColor: string;
-  shape?: 'rectangle' | 'circle' | 'hexagon';
+  shape?: 'rectangle' | 'circle' | 'hexagon' | 'L-shape' | 'T-shape';
 }
 
 const Room: React.FC<RoomProps> = ({ 
@@ -48,7 +48,11 @@ const Room: React.FC<RoomProps> = ({
       case 'circle':
         return 'rounded-full';
       case 'hexagon':
-        return 'rounded-lg transform rotate-45';
+        return 'rounded-lg';
+      case 'L-shape':
+        return 'rounded-lg';
+      case 'T-shape':
+        return 'rounded-lg';
       default:
         return 'rounded-lg';
     }
@@ -63,6 +67,7 @@ const Room: React.FC<RoomProps> = ({
       case 'blue': return isHovered ? 'border-blue-400' : 'border-blue-600/50';
       case 'red': return isHovered ? 'border-red-400' : 'border-red-600/50';
       case 'yellow': return isHovered ? 'border-yellow-400' : 'border-yellow-600/50';
+      case 'pink': return isHovered ? 'border-pink-400' : 'border-pink-600/50';
       default: return isHovered ? 'border-gray-400' : 'border-gray-600/50';
     }
   };
@@ -76,27 +81,29 @@ const Room: React.FC<RoomProps> = ({
       case 'blue': return isHovered ? 'bg-blue-500/30' : 'bg-blue-900/20';
       case 'red': return isHovered ? 'bg-red-500/30' : 'bg-red-900/20';
       case 'yellow': return isHovered ? 'bg-yellow-500/30' : 'bg-yellow-900/20';
+      case 'pink': return isHovered ? 'bg-pink-500/30' : 'bg-pink-900/20';
       default: return isHovered ? 'bg-gray-500/30' : 'bg-gray-900/20';
     }
   };
 
   const getTextColor = () => {
     switch (color) {
-      case 'cyan': return 'text-cyan-400';
-      case 'purple': return 'text-purple-400';
-      case 'green': return 'text-green-400';
-      case 'orange': return 'text-orange-400';
-      case 'blue': return 'text-blue-400';
-      case 'red': return 'text-red-400';
-      case 'yellow': return 'text-yellow-400';
-      default: return 'text-gray-400';
+      case 'cyan': return 'text-cyan-300';
+      case 'purple': return 'text-purple-300';
+      case 'green': return 'text-green-300';
+      case 'orange': return 'text-orange-300';
+      case 'blue': return 'text-blue-300';
+      case 'red': return 'text-red-300';
+      case 'yellow': return 'text-yellow-300';
+      case 'pink': return 'text-pink-300';
+      default: return 'text-gray-300';
     }
   };
 
   return (
     <div
       className={`absolute cursor-pointer transition-all duration-300 ${
-        isHovered ? 'scale-110 z-20' : 'z-10'
+        isHovered ? 'scale-105 z-20' : 'z-10'
       }`}
       style={{
         left: `${position.x}%`,
@@ -113,7 +120,7 @@ const Room: React.FC<RoomProps> = ({
         className={`w-full h-full border-2 transition-all duration-300 ${getShapeClasses()} ${getBorderColor()} ${getBgColor()}`}
       >
         {/* Room content */}
-        <div className={`flex flex-col items-center justify-center h-full p-2 relative ${shape === 'hexagon' ? 'transform -rotate-45' : ''}`}>
+        <div className="flex flex-col items-center justify-center h-full p-2 relative">
           {/* Icon */}
           <div className={getTextColor()}>
             {icon}
@@ -149,19 +156,20 @@ const Room: React.FC<RoomProps> = ({
 const Corridor: React.FC<{
   start: { x: number; y: number };
   end: { x: number; y: number };
+  width?: number;
   className?: string;
-}> = ({ start, end, className = '' }) => {
+}> = ({ start, end, width = 6, className = '' }) => {
   const length = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
   const angle = Math.atan2(end.y - start.y, end.x - start.x) * 180 / Math.PI;
 
   return (
     <div
-      className={`absolute bg-gray-600/30 ${className}`}
+      className={`absolute bg-gray-600/40 ${className}`}
       style={{
         left: `${start.x}%`,
         top: `${start.y}%`,
         width: `${length}%`,
-        height: '4px',
+        height: `${width}px`,
         transformOrigin: '0 50%',
         transform: `rotate(${angle}deg)`,
         zIndex: 1,
@@ -216,162 +224,178 @@ export const SpaceshipDashboard: React.FC<SpaceshipDashboardProps> = ({
     }, 500);
   };
 
-  // Define spaceship rooms layout - scattered like Among Us map
+  // Define spaceship rooms layout - exactly like Among Us Skeld map
   const rooms = [
-    // Upper Engine (Add Item)
+    // Upper Engine
     {
       id: 'add',
       name: 'Add New Item',
-      icon: <Plus className="w-6 h-6" />,
-      position: { x: 15, y: 8 },
-      size: { width: 120, height: 80 },
-      color: 'cyan',
-      crewmateColor: 'green',
+      icon: <Plus className="w-5 h-5" />,
+      position: { x: 8, y: 8 },
+      size: { width: 110, height: 80 },
+      color: 'orange',
+      crewmateColor: 'orange',
       onClick: () => handleRoomClick('add'),
       shape: 'rectangle' as const
     },
     
-    // Upper Left - Visual Maps (like Weapons)
+    // Lower Engine
+    {
+      id: 'settings',
+      name: 'Settings',
+      icon: <Settings className="w-5 h-5" />,
+      position: { x: 8, y: 75 },
+      size: { width: 110, height: 80 },
+      color: 'orange',
+      crewmateColor: 'red',
+      onClick: () => handleRoomClick('settings'),
+      shape: 'rectangle' as const
+    },
+    
+    // Security (top right)
+    {
+      id: 'history',
+      name: 'History',
+      icon: <History className="w-5 h-5" />,
+      position: { x: 75, y: 15 },
+      size: { width: 100, height: 70 },
+      color: 'red',
+      crewmateColor: 'red',
+      onClick: () => handleRoomClick('history'),
+      shape: 'rectangle' as const
+    },
+    
+    // Weapons (left side)
     {
       id: 'visual-map',
       name: 'Visual Maps',
       icon: <Map className="w-5 h-5" />,
-      position: { x: 5, y: 25 },
-      size: { width: 100, height: 70 },
-      color: 'blue',
-      crewmateColor: 'cyan',
+      position: { x: 5, y: 35 },
+      size: { width: 90, height: 70 },
+      color: 'red',
+      crewmateColor: 'blue',
       onClick: () => handleRoomClick('visual-map'),
       shape: 'rectangle' as const
     },
     
-    // Left side - Virtual Drawers (like Storage)
-    {
-      id: 'virtual-drawers',
-      name: 'Virtual Drawers',
-      icon: <Archive className="w-5 h-5" />,
-      position: { x: 8, y: 50 },
-      size: { width: 100, height: 70 },
-      color: 'purple',
-      crewmateColor: 'purple',
-      onClick: () => handleRoomClick('virtual-drawers'),
-      shape: 'rectangle' as const
-    },
-    
-    // Center - Main Inventory (like Cafeteria)
-    {
-      id: 'inventory',
-      name: 'Full Inventory',
-      icon: <Package className="w-7 h-7" />,
-      position: { x: 35, y: 35 },
-      size: { width: 140, height: 100 },
-      color: 'cyan',
-      crewmateColor: 'blue',
-      onClick: () => handleRoomClick('inventory'),
-      shape: 'hexagon' as const
-    },
-    
-    // Upper Right - Groups (like Medbay)
-    {
-      id: 'groups',
-      name: 'Item Groups',
-      icon: <Users className="w-5 h-5" />,
-      position: { x: 75, y: 20 },
-      size: { width: 100, height: 70 },
-      color: 'green',
-      crewmateColor: 'green',
-      onClick: () => handleRoomClick('groups'),
-      shape: 'circle' as const
-    },
-    
-    // Right side - Virtual Tour (like Navigation)
+    // O2 (top center)
     {
       id: 'virtual-tour',
       name: 'Virtual Tour',
       icon: <Route className="w-5 h-5" />,
-      position: { x: 78, y: 45 },
+      position: { x: 40, y: 8 },
       size: { width: 100, height: 70 },
-      color: 'orange',
+      color: 'yellow',
       crewmateColor: 'yellow',
       onClick: () => handleRoomClick('virtual-tour'),
       shape: 'rectangle' as const
     },
     
-    // Lower Left - Photo Search (like Electrical)
+    // Navigation (right side)
+    {
+      id: 'groups',
+      name: 'Item Groups',
+      icon: <Users className="w-5 h-5" />,
+      position: { x: 75, y: 40 },
+      size: { width: 100, height: 70 },
+      color: 'blue',
+      crewmateColor: 'blue',
+      onClick: () => handleRoomClick('groups'),
+      shape: 'rectangle' as const
+    },
+    
+    // Cafeteria (center)
+    {
+      id: 'inventory',
+      name: 'Full Inventory',
+      icon: <Package className="w-6 h-6" />,
+      position: { x: 35, y: 35 },
+      size: { width: 130, height: 90 },
+      color: 'green',
+      crewmateColor: 'green',
+      onClick: () => handleRoomClick('inventory'),
+      shape: 'rectangle' as const
+    },
+    
+    // Storage (left bottom)
+    {
+      id: 'virtual-drawers',
+      name: 'Virtual Drawers',
+      icon: <Archive className="w-5 h-5" />,
+      position: { x: 5, y: 60 },
+      size: { width: 90, height: 70 },
+      color: 'orange',
+      crewmateColor: 'purple',
+      onClick: () => handleRoomClick('virtual-drawers'),
+      shape: 'rectangle' as const
+    },
+    
+    // Electrical (bottom left)
     {
       id: 'photo-search',
       name: 'Photo Search',
       icon: <Camera className="w-5 h-5" />,
-      position: { x: 12, y: 75 },
-      size: { width: 100, height: 70 },
+      position: { x: 25, y: 75 },
+      size: { width: 90, height: 70 },
       color: 'yellow',
-      crewmateColor: 'pink',
+      crewmateColor: 'lime',
       onClick: () => handleRoomClick('photo-search'),
       shape: 'rectangle' as const
     },
     
-    // Lower Center - Reminders (like Admin)
+    // Admin (bottom center)
     {
       id: 'reminders',
       name: 'Reminders',
       icon: <Bell className="w-5 h-5" />,
-      position: { x: 40, y: 75 },
-      size: { width: 100, height: 70 },
-      color: 'orange',
-      crewmateColor: 'orange',
+      position: { x: 45, y: 75 },
+      size: { width: 90, height: 70 },
+      color: 'cyan',
+      crewmateColor: 'cyan',
       onClick: () => handleRoomClick('reminders'),
       badge: upcomingReminders.length,
       shape: 'rectangle' as const
     },
     
-    // Lower Right - History (like Security)
+    // Shields (right bottom)
     {
-      id: 'history',
-      name: 'History',
-      icon: <History className="w-5 h-5" />,
-      position: { x: 68, y: 75 },
-      size: { width: 100, height: 70 },
-      color: 'blue',
-      crewmateColor: 'blue',
-      onClick: () => handleRoomClick('history'),
-      shape: 'rectangle' as const
-    },
-    
-    // Lower Engine - Settings
-    {
-      id: 'settings',
-      name: 'Settings',
-      icon: <Settings className="w-5 h-5" />,
-      position: { x: 75, y: 8 },
-      size: { width: 100, height: 70 },
-      color: 'red',
-      crewmateColor: 'red',
-      onClick: () => handleRoomClick('settings'),
+      id: 'shields',
+      name: 'Help & Guide',
+      icon: <HelpCircle className="w-5 h-5" />,
+      position: { x: 75, y: 75 },
+      size: { width: 90, height: 70 },
+      color: 'yellow',
+      crewmateColor: 'white',
+      onClick: () => handleRoomClick('help'),
       shape: 'rectangle' as const
     }
   ];
 
-  // Define corridors connecting rooms like Among Us hallways
+  // Define corridors exactly like Among Us Skeld map
   const corridors = [
-    // Main horizontal corridor (top)
-    { start: { x: 25, y: 20 }, end: { x: 75, y: 20 } },
-    // Main horizontal corridor (middle)
-    { start: { x: 15, y: 50 }, end: { x: 85, y: 50 } },
-    // Main horizontal corridor (bottom)
-    { start: { x: 20, y: 80 }, end: { x: 80, y: 80 } },
-    // Vertical connectors
-    { start: { x: 50, y: 20 }, end: { x: 50, y: 80 } },
-    { start: { x: 25, y: 20 }, end: { x: 25, y: 50 } },
-    { start: { x: 75, y: 20 }, end: { x: 75, y: 80 } },
-    // Diagonal connectors
-    { start: { x: 35, y: 35 }, end: { x: 25, y: 50 } },
-    { start: { x: 55, y: 35 }, end: { x: 75, y: 50 } },
+    // Main horizontal hallway (top)
+    { start: { x: 25, y: 25 }, end: { x: 75, y: 25 } },
+    // Main horizontal hallway (bottom)
+    { start: { x: 25, y: 85 }, end: { x: 75, y: 85 } },
+    // Main vertical hallway (left)
+    { start: { x: 25, y: 25 }, end: { x: 25, y: 85 } },
+    // Main vertical hallway (right)
+    { start: { x: 75, y: 25 }, end: { x: 75, y: 85 } },
+    // Central cross connections
+    { start: { x: 40, y: 45 }, end: { x: 65, y: 45 } },
+    { start: { x: 50, y: 25 }, end: { x: 50, y: 75 } },
+    // Engine connections
+    { start: { x: 18, y: 25 }, end: { x: 18, y: 85 } },
+    // Cafeteria connections
+    { start: { x: 35, y: 55 }, end: { x: 25, y: 55 } },
+    { start: { x: 65, y: 55 }, end: { x: 75, y: 55 } },
   ];
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Subtle starfield background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(200)].map((_, i) => (
+        {[...Array(150)].map((_, i) => (
           <div
             key={i}
             className="absolute bg-white rounded-full"
@@ -380,21 +404,10 @@ export const SpaceshipDashboard: React.FC<SpaceshipDashboardProps> = ({
               height: `${Math.random() * 2 + 1}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              opacity: Math.random() * 0.4 + 0.1,
+              opacity: Math.random() * 0.3 + 0.1,
             }}
           />
         ))}
-      </div>
-
-      {/* Subtle grid overlay */}
-      <div className="fixed inset-0 opacity-10 pointer-events-none">
-        <div className="w-full h-full" style={{
-          backgroundImage: `
-            linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '30px 30px'
-        }} />
       </div>
 
       <div className="relative z-10 p-4">
@@ -463,28 +476,29 @@ export const SpaceshipDashboard: React.FC<SpaceshipDashboardProps> = ({
           </div>
         )}
 
-        {/* Spaceship Floor Plan - Among Us Style */}
+        {/* Among Us Skeld Map Layout */}
         <div className="max-w-6xl mx-auto">
-          <div className="relative w-full h-[500px] bg-gray-900/30 rounded-2xl border border-cyan-400/20 overflow-hidden">
-            {/* Spaceship outline - more angular like Among Us */}
+          <div className="relative w-full h-[600px] bg-gray-900/50 rounded-3xl border-2 border-gray-600/50 overflow-hidden">
+            {/* Spaceship outline - Skeld shape */}
             <div 
-              className="absolute inset-8 border-2 border-gray-600/40 bg-gray-800/20"
+              className="absolute inset-6 border-3 border-gray-500/60 bg-gray-800/30 rounded-2xl"
               style={{
-                clipPath: 'polygon(20% 0%, 80% 0%, 95% 15%, 95% 85%, 80% 100%, 20% 100%, 5% 85%, 5% 15%)'
+                clipPath: 'polygon(15% 5%, 85% 5%, 95% 15%, 95% 85%, 85% 95%, 15% 95%, 5% 85%, 5% 15%)'
               }}
             />
 
-            {/* Corridors - Among Us style hallways */}
+            {/* Corridors - Among Us Skeld hallways */}
             {corridors.map((corridor, index) => (
               <Corridor
                 key={index}
                 start={corridor.start}
                 end={corridor.end}
-                className="opacity-40"
+                width={8}
+                className="opacity-60"
               />
             ))}
 
-            {/* Rooms scattered like Among Us map */}
+            {/* Rooms positioned exactly like Skeld map */}
             {rooms.map((room) => (
               <Room
                 key={room.id}
@@ -497,31 +511,20 @@ export const SpaceshipDashboard: React.FC<SpaceshipDashboardProps> = ({
             {movingCrewmate && (
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
                 <div className="animate-ping">
-                  <CrewmateIcon color="cyan" size="md" animate />
+                  <CrewmateIcon color="cyan" size="lg" animate />
                 </div>
               </div>
             )}
 
-            {/* Floating decorative crewmates */}
-            <FloatingCrewmate color="blue" className="top-6 left-12" />
-            <FloatingCrewmate color="green" className="top-12 right-16" />
-            <FloatingCrewmate color="yellow" className="bottom-12 left-20" />
-            <FloatingCrewmate color="purple" className="bottom-6 right-12" />
-            <FloatingCrewmate color="red" className="top-1/2 left-6" />
-            <FloatingCrewmate color="orange" className="top-1/2 right-6" />
-          </div>
-
-          {/* Help button below the ship */}
-          <div className="text-center mt-6">
-            <SpaceButton
-              onClick={() => handleRoomClick('help')}
-              variant="primary"
-              className="px-6 py-3"
-            >
-              <HelpCircle className="w-5 h-5" />
-              Help & Guide
-              <CrewmateIcon color="cyan" size="sm" />
-            </SpaceButton>
+            {/* Floating decorative crewmates around the ship */}
+            <FloatingCrewmate color="red" className="top-8 left-16" />
+            <FloatingCrewmate color="blue" className="top-16 right-20" />
+            <FloatingCrewmate color="green" className="bottom-16 left-24" />
+            <FloatingCrewmate color="yellow" className="bottom-8 right-16" />
+            <FloatingCrewmate color="purple" className="top-1/2 left-8" />
+            <FloatingCrewmate color="pink" className="top-1/2 right-8" />
+            <FloatingCrewmate color="lime" className="top-1/3 left-1/2" />
+            <FloatingCrewmate color="orange" className="bottom-1/3 right-1/3" />
           </div>
         </div>
 
