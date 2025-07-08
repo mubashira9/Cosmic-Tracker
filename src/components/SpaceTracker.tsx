@@ -104,64 +104,90 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
   };
 
   const loadItems = async () => {
-    const { data, error } = await supabase
-      .from('items')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('items')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading items:', error);
-      return;
+      if (error) {
+        console.error('Error loading items:', error);
+        setItems([]);
+        return;
+      }
+
+      const itemsWithCategories = data.map(item => ({
+        ...item,
+        category: categories.find(cat => cat.id === item.category) || categories[0]
+      }));
+
+      setItems(itemsWithCategories);
+    } catch (error) {
+      console.error('Network error loading items:', error);
+      setItems([]);
     }
-
-    const itemsWithCategories = data.map(item => ({
-      ...item,
-      category: categories.find(cat => cat.id === item.category) || categories[0]
-    }));
-
-    setItems(itemsWithCategories);
   };
 
   const loadHistory = async () => {
-    const { data, error } = await supabase
-      .from('item_history')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('item_history')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading history:', error);
-      return;
+      if (error) {
+        console.error('Error loading history:', error);
+        // Don't throw, just log and continue with empty array
+        setHistory([]);
+        return;
+      }
+
+      setHistory(data || []);
+    } catch (error) {
+      console.error('Network error loading history:', error);
+      // Set empty array on network errors
+      setHistory([]);
     }
-
-    setHistory(data || []);
   };
 
   const loadReminders = async () => {
-    const { data, error } = await supabase
-      .from('item_reminders')
-      .select('*')
-      .order('expiry_date', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('item_reminders')
+        .select('*')
+        .order('expiry_date', { ascending: true });
 
-    if (error) {
-      console.error('Error loading reminders:', error);
-      return;
+      if (error) {
+        console.error('Error loading reminders:', error);
+        setReminders([]);
+        return;
+      }
+
+      setReminders(data || []);
+    } catch (error) {
+      console.error('Network error loading reminders:', error);
+      setReminders([]);
     }
-
-    setReminders(data || []);
   };
 
   const loadVisualMaps = async () => {
-    const { data, error } = await supabase
-      .from('visual_maps')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('visual_maps')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading visual maps:', error);
-      return;
+      if (error) {
+        console.error('Error loading visual maps:', error);
+        setVisualMaps([]);
+        return;
+      }
+
+      setVisualMaps(data || []);
+    } catch (error) {
+      console.error('Network error loading visual maps:', error);
+      setVisualMaps([]);
     }
-
-    setVisualMaps(data || []);
   };
 
   const addToHistory = async (itemId: string | null, itemName: string, action: string, oldValues?: any, newValues?: any) => {

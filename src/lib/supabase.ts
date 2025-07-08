@@ -22,7 +22,31 @@ try {
   throw new Error('Invalid Supabase URL format. Please check your VITE_SUPABASE_URL in .env file.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'space-tracker-app'
+    }
+  }
+});
+
+// Test connection on initialization
+supabase.from('item_history').select('count', { count: 'exact', head: true })
+  .then(({ error }) => {
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+    } else {
+      console.log('Supabase connection test successful');
+    }
+  })
+  .catch((error) => {
+    console.error('Supabase connection test error:', error);
+  });
 
 export type Database = {
   public: {
