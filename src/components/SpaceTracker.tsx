@@ -19,8 +19,7 @@ import { VirtualTourView } from './views/VirtualTourView';
 import { PhotoSearchView } from './views/PhotoSearchView';
 import { Help } from './Help';
 import { PinPrompt } from './ui/PinPrompt';
-import { SpaceBackground } from './ui/SpaceBackground';
-import { CrewmateIcon } from './ui/CrewmateIcon';
+import { StarField } from './ui/StarField';
 
 // Types
 export type Item = Database['public']['Tables']['items']['Row'] & {
@@ -237,22 +236,13 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
 
   if (loading) {
     return (
-      <SpaceBackground variant="spaceship">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <Globe className="w-16 h-16 text-cyan-400 animate-spin" style={{animationDuration: '2s'}} />
-              <CrewmateIcon color="cyan" size="lg" animate />
-            </div>
-            <p className="text-white text-lg mb-2">Loading your cosmic inventory...</p>
-            <div className="flex items-center justify-center gap-2">
-              <CrewmateIcon color="blue" size="sm" />
-              <span className="text-cyan-300 text-sm">Initializing spaceship systems...</span>
-              <CrewmateIcon color="green" size="sm" />
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 flex items-center justify-center">
+        <StarField />
+        <div className="relative z-10 text-center">
+          <Globe className="w-16 h-16 text-slate-400 animate-spin mx-auto mb-4" style={{animationDuration: '2s'}} />
+          <p className="text-white text-lg">Loading your cosmic inventory...</p>
         </div>
-      </SpaceBackground>
+      </div>
     );
   }
 

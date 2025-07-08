@@ -1,12 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Stage, Layer, Image as KonvaImage, Group, Rect, Text } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Circle, Text, Group, Rect } from 'react-konva';
 import { Map, Upload, Save, X, Plus, Trash2, Eye, EyeOff, ZoomIn, ZoomOut, RotateCcw, Package, ArrowLeft, LogOut } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
-import { SpaceBackground } from '../ui/SpaceBackground';
-import { SpaceButton } from '../ui/SpaceButton';
-import { SpacePanel } from '../ui/SpacePanel';
-import { CrewmateIcon, FloatingCrewmate } from '../ui/CrewmateIcon';
+import { StarField } from '../ui/StarField';
 import type { Item } from '../SpaceTracker';
 
 interface VisualMapViewProps {
@@ -36,74 +33,6 @@ interface MapData {
   updated_at?: string;
 }
 
-// Crewmate marker component for Konva
-const CrewmateMarker: React.FC<{
-  x: number;
-  y: number;
-  color: string;
-  selected: boolean;
-  onClick: () => void;
-  onDragEnd: (e: any) => void;
-}> = ({ x, y, color, selected, onClick, onDragEnd }) => {
-  const colors: { [key: string]: string } = {
-    red: '#C51111',
-    blue: '#132ED1',
-    green: '#117F2D',
-    yellow: '#F7F557',
-    pink: '#ED54BA',
-    orange: '#F07613',
-    purple: '#6B2FBB',
-    cyan: '#38FEDC'
-  };
-
-  return (
-    <Group
-      x={x}
-      y={y}
-      draggable
-      onClick={onClick}
-      onDragEnd={onDragEnd}
-    >
-      {/* Body */}
-      <Rect
-        width={30}
-        height={40}
-        fill={colors[color] || colors.blue}
-        cornerRadius={15}
-        offsetX={15}
-        offsetY={20}
-        stroke={selected ? '#FFFFFF' : '#000000'}
-        strokeWidth={selected ? 3 : 1}
-      />
-      
-      {/* Visor */}
-      <Rect
-        width={20}
-        height={25}
-        fill="#87CEEB"
-        cornerRadius={10}
-        offsetX={10}
-        offsetY={12}
-        y={-8}
-        opacity={0.9}
-      />
-      
-      {/* Visor reflection */}
-      <Rect
-        width={8}
-        height={10}
-        fill="#FFFFFF"
-        cornerRadius={4}
-        offsetX={4}
-        offsetY={5}
-        x={-8}
-        y={-12}
-        opacity={0.6}
-      />
-    </Group>
-  );
-};
-
 export const VisualMapView: React.FC<VisualMapViewProps> = ({
   items,
   onBack,
@@ -124,11 +53,10 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
   const [loading, setLoading] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [newMapName, setNewMapName] = useState('');
+  const [draggedMarker, setDraggedMarker] = useState<string | null>(null);
   
   const stageRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const crewmateColors = ['red', 'blue', 'green', 'yellow', 'pink', 'orange', 'purple', 'cyan'];
 
   useEffect(() => {
     if (user) {
@@ -309,12 +237,14 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
     setMarkers(prev => prev.map(marker =>
       marker.id === markerId ? { ...marker, x: newX, y: newY } : marker
     ));
+    setDraggedMarker(null);
   };
 
   const handleStageClick = (e: any) => {
     // If we're in add marker mode, add a marker at click position
     if (showAddMarker && newMarkerItem) {
       const pos = e.target.getStage().getPointerPosition();
+      const stageBox = e.target.getStage().container().getBoundingClientRect();
       const x = (pos.x - stagePos.x) / scale;
       const y = (pos.y - stagePos.y) / scale;
       addMarker(x, y);
@@ -362,8 +292,9 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
     return item ? item.name : 'Unknown Item';
   };
 
-  const getMarkerColor = (index: number) => {
-    return crewmateColors[index % crewmateColors.length];
+  const getItemIcon = (itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    return item ? item.category.icon : '📦';
   };
 
   const availableItems = items.filter(item => 
@@ -375,75 +306,61 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
   // Show maps list view by default
   if (!currentMap) {
     return (
-      <SpaceBackground variant="spaceship">
-        {/* Floating crewmates */}
-        <FloatingCrewmate color="blue" className="top-20 left-10" />
-        <FloatingCrewmate color="green" className="top-32 right-16" />
-        <FloatingCrewmate color="red" className="bottom-40 left-20" />
-        <FloatingCrewmate color="yellow" className="bottom-20 right-12" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+        <StarField />
         
-        <div className="p-4 max-w-2xl mx-auto">
+        <div className="relative z-10 p-4 max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 pt-4">
-            <SpaceButton
+            <button
               onClick={onBack}
-              variant="secondary"
-              size="sm"
+              className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30"
             >
               ← Back to Command Center
-            </SpaceButton>
-            <h1 className="text-xl font-bold flex items-center gap-2 text-cyan-400">
+            </button>
+            <h1 className="text-xl font-bold flex items-center gap-2 text-slate-400">
               <Map className="w-6 h-6" />
               Visual Maps
-              <CrewmateIcon color="cyan" size="md" />
             </h1>
-            <SpaceButton
+            <button
               onClick={onSignOut}
-              variant="danger"
-              size="sm"
-              className="p-2"
+              className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
+              title="Sign Out"
             >
-              <LogOut className="w-4 h-4" />
-            </SpaceButton>
+              <LogOut className="w-5 h-5 text-red-400" />
+            </button>
           </div>
 
           {/* Create New Map Button */}
           <div className="mb-6">
-            <SpaceButton
+            <button
               onClick={() => setShowUploadForm(true)}
-              variant="primary"
-              className="w-full"
+              className="w-full p-4 bg-gradient-to-r from-slate-500 to-gray-600 rounded-xl font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center gap-2 text-white"
             >
               <Upload className="w-5 h-5" />
               Create New Visual Map
-              <CrewmateIcon color="green" size="sm" />
-            </SpaceButton>
+            </button>
           </div>
 
           {/* Upload Form */}
           {showUploadForm && (
-            <SpacePanel variant="control" className="p-4 mb-6" glowing>
+            <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-cyan-400 flex items-center gap-2">
-                  Create New Map
-                  <CrewmateIcon color="cyan" size="sm" />
-                </h3>
-                <SpaceButton
+                <h3 className="font-semibold text-slate-400">Create New Map</h3>
+                <button
                   onClick={() => {
                     setShowUploadForm(false);
                     setNewMapName('');
                   }}
-                  variant="secondary"
-                  size="sm"
-                  className="p-1"
+                  className="p-1 hover:bg-gray-700 rounded"
                 >
-                  <X className="w-4 h-4" />
-                </SpaceButton>
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-cyan-400">
+                  <label className="block text-sm font-medium mb-2 text-slate-400">
                     Map Name
                   </label>
                   <input
@@ -451,12 +368,12 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                     value={newMapName}
                     onChange={(e) => setNewMapName(e.target.value)}
                     placeholder="e.g., Living Room Floor Plan"
-                    className="w-full p-2 bg-gray-800/50 border border-cyan-400/30 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none backdrop-blur-sm"
+                    className="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-slate-400 focus:outline-none"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-cyan-400">
+                  <label className="block text-sm font-medium mb-2 text-slate-400">
                     Map Image
                   </label>
                   <input
@@ -466,52 +383,44 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <SpaceButton
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={!newMapName.trim()}
-                    variant="secondary"
-                    className="w-full p-3 border-2 border-dashed border-cyan-400/30"
+                    className="w-full p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-slate-400/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-gray-400"
                   >
                     <Upload className="w-5 h-5" />
                     Click to upload floor plan, shelf diagram, or storage map
-                  </SpaceButton>
+                  </button>
                 </div>
               </div>
-            </SpacePanel>
+            </div>
           )}
 
           {/* Maps List */}
           <div className="space-y-4">
             {maps.length === 0 ? (
-              <SpacePanel variant="default" className="p-12 text-center">
+              <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-12 border border-gray-500/30 text-center">
                 <Map className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                 <p className="text-gray-400 mb-4">
                   No visual maps created yet. Upload your first floor plan or storage diagram to get started!
                 </p>
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <CrewmateIcon color="blue" size="sm" />
-                  <span className="text-cyan-300 text-sm">Ready for spaceship mapping!</span>
-                  <CrewmateIcon color="green" size="sm" />
-                </div>
-                <SpaceButton
+                <button
                   onClick={() => setShowUploadForm(true)}
-                  variant="primary"
+                  className="px-6 py-3 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center gap-2 text-white mx-auto"
                 >
                   <Upload className="w-5 h-5" />
                   Upload Your First Map
-                </SpaceButton>
-              </SpacePanel>
+                </button>
+              </div>
             ) : (
               <>
-                <h2 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-400 mb-4">
                   Your Visual Maps ({maps.length})
-                  <CrewmateIcon color="cyan" size="sm" />
                 </h2>
                 {maps.map((map) => (
-                  <SpacePanel
+                  <div
                     key={map.id}
-                    variant="default"
-                    className="p-4 hover:border-cyan-400/50 transition-all cursor-pointer"
+                    className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-slate-400/50 transition-all cursor-pointer"
                     onClick={() => setCurrentMap(map)}
                   >
                     <div className="flex items-center gap-4">
@@ -521,12 +430,11 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                         </div>
                       )}
                       <div className="flex-1">
-                        <h3 className="font-semibold text-cyan-400 mb-1 flex items-center gap-2">
+                        <h3 className="font-semibold text-slate-400 mb-1">
                           {map.name}
-                          <CrewmateIcon color="blue" size="sm" />
                         </h3>
                         <p className="text-sm text-gray-400">
-                          {map.markers?.length || 0} crewmate markers
+                          {map.markers?.length || 0} item markers
                         </p>
                         <p className="text-xs text-gray-500">
                           Created: {new Date(map.created_at).toLocaleDateString()}
@@ -534,111 +442,104 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                       </div>
                       <ArrowLeft className="w-5 h-5 text-gray-400 transform rotate-180" />
                     </div>
-                  </SpacePanel>
+                  </div>
                 ))}
               </>
             )}
           </div>
         </div>
-      </SpaceBackground>
+      </div>
     );
   }
 
   return (
-    <SpaceBackground variant="spaceship">
-      <div className="p-4 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+      <StarField />
+      
+      <div className="relative z-10 p-4 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pt-4">
-          <SpaceButton
+          <button
             onClick={() => setCurrentMap(null)}
-            variant="secondary"
-            size="sm"
+            className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30"
           >
             ← Back to Maps
-          </SpaceButton>
-          <h1 className="text-xl font-bold flex items-center gap-2 text-cyan-400">
+          </button>
+          <h1 className="text-xl font-bold flex items-center gap-2 text-slate-400">
             <Map className="w-6 h-6" />
             {currentMap?.name || 'Visual Map'}
-            <CrewmateIcon color="cyan" size="md" />
           </h1>
-          <SpaceButton
+          <button
             onClick={onSignOut}
-            variant="danger"
-            size="sm"
-            className="p-2"
+            className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
+            title="Sign Out"
           >
-            <LogOut className="w-4 h-4" />
-          </SpaceButton>
+            <LogOut className="w-5 h-5 text-red-400" />
+          </button>
         </div>
 
         {/* Map Controls */}
         {currentMap && (
-          <SpacePanel variant="control" className="p-4 mb-6" glowing>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 mb-6">
             <div className="flex flex-wrap items-center gap-2">
-              <SpaceButton
+              <button
                 onClick={() => setShowAddMarker(!showAddMarker)}
-                variant={showAddMarker ? "primary" : "secondary"}
-                size="sm"
+                className={`px-3 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                  showAddMarker 
+                    ? 'bg-slate-400/20 text-slate-400 border border-slate-400/50'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
               >
                 <Plus className="w-4 h-4" />
-                Add Crewmate Marker
-                <CrewmateIcon color="green" size="sm" />
-              </SpaceButton>
+                Add Marker
+              </button>
 
-              <SpaceButton
+              <button
                 onClick={saveMarkers}
                 disabled={loading}
-                variant="success"
-                size="sm"
+                className="px-3 py-2 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center gap-2 text-white disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 Save Changes
-              </SpaceButton>
+              </button>
 
               <div className="flex items-center gap-1 ml-4">
-                <SpaceButton
+                <button
                   onClick={() => setScale(prev => Math.min(5, prev * 1.2))}
-                  variant="secondary"
-                  size="sm"
-                  className="p-2"
+                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  title="Zoom In"
                 >
-                  <ZoomIn className="w-4 h-4" />
-                </SpaceButton>
-                <SpaceButton
+                  <ZoomIn className="w-4 h-4 text-gray-300" />
+                </button>
+                <button
                   onClick={() => setScale(prev => Math.max(0.1, prev / 1.2))}
-                  variant="secondary"
-                  size="sm"
-                  className="p-2"
+                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  title="Zoom Out"
                 >
-                  <ZoomOut className="w-4 h-4" />
-                </SpaceButton>
-                <SpaceButton
+                  <ZoomOut className="w-4 h-4 text-gray-300" />
+                </button>
+                <button
                   onClick={resetView}
-                  variant="secondary"
-                  size="sm"
-                  className="p-2"
+                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  title="Reset View"
                 >
-                  <RotateCcw className="w-4 h-4" />
-                </SpaceButton>
+                  <RotateCcw className="w-4 h-4 text-gray-300" />
+                </button>
               </div>
 
-              <div className="text-sm text-cyan-300 ml-4 flex items-center gap-2">
-                <CrewmateIcon color="cyan" size="sm" />
+              <div className="text-sm text-gray-400 ml-4">
                 Zoom: {Math.round(scale * 100)}%
               </div>
             </div>
-          </SpacePanel>
+          </div>
         )}
 
         {/* Add Marker Form */}
         {showAddMarker && (
-          <SpacePanel variant="control" className="p-4 mb-6" glowing>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-cyan-400 flex items-center gap-2">
-                Add Crewmate Marker
-                <CrewmateIcon color="green" size="sm" />
-              </h3>
-              <SpaceButton
+              <h3 className="font-semibold text-slate-400">Add Item Marker</h3>
+              <button
                 onClick={() => {
                   setShowAddMarker(false);
                   setNewMarkerItem('');
@@ -646,23 +547,21 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                     onSelectedItemChange(null);
                   }
                 }}
-                variant="secondary"
-                size="sm"
-                className="p-1"
+                className="p-1 hover:bg-gray-700 rounded"
               >
-                <X className="w-4 h-4" />
-              </SpaceButton>
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
             </div>
             
             <div className="flex gap-4 items-end">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2 text-cyan-400">
+                <label className="block text-sm font-medium mb-2 text-slate-400">
                   Select Item to Mark
                 </label>
                 <select
                   value={newMarkerItem}
                   onChange={(e) => setNewMarkerItem(e.target.value)}
-                  className="w-full p-2 bg-gray-800/50 border border-cyan-400/30 rounded-lg text-white focus:border-cyan-400 focus:outline-none backdrop-blur-sm"
+                  className="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-slate-400 focus:outline-none"
                 >
                   <option value="">Choose an item...</option>
                   {availableItems.map(item => (
@@ -674,20 +573,19 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
               </div>
               
               {newMarkerItem && (
-                <div className="text-sm text-cyan-400 px-3 py-2 bg-cyan-400/10 rounded-lg flex items-center gap-2">
-                  <CrewmateIcon color="cyan" size="sm" />
-                  Click on the map to place crewmate
+                <div className="text-sm text-slate-400 px-3 py-2 bg-slate-400/10 rounded-lg">
+                  Click on the map to place marker
                 </div>
               )}
             </div>
-          </SpacePanel>
+          </div>
         )}
 
         {/* Main Canvas Area */}
         {currentMap && mapImage ? (
           <div className="flex gap-6">
             {/* Canvas */}
-            <SpacePanel variant="default" className="flex-1 overflow-hidden">
+            <div className="flex-1 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl border border-gray-500/30 overflow-hidden">
               <Stage
                 ref={stageRef}
                 width={800}
@@ -714,49 +612,88 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                     height={mapImage.height}
                   />
                   
-                  {/* Crewmate Markers */}
-                  {markers.filter(marker => marker.visible).map((marker, index) => (
-                    <CrewmateMarker
+                  {/* Item Markers */}
+                  {markers.filter(marker => marker.visible).map((marker) => (
+                    <Group
                       key={marker.id}
                       x={marker.x}
                       y={marker.y}
-                      color={getMarkerColor(index)}
-                      selected={selectedMarker === marker.id}
-                      onClick={() => setSelectedMarker(marker.id)}
+                      draggable
+                      onDragStart={() => setDraggedMarker(marker.id)}
                       onDragEnd={(e) => handleMarkerDragEnd(marker.id, e)}
-                    />
+                      onClick={() => setSelectedMarker(marker.id)}
+                    >
+                      {/* Marker Circle */}
+                      <Circle
+                        radius={20}
+                        fill={selectedMarker === marker.id ? '#ff6b6b' : '#64748b'}
+                        stroke={selectedMarker === marker.id ? '#ff5252' : '#475569'}
+                        strokeWidth={3}
+                        shadowColor="black"
+                        shadowBlur={10}
+                        shadowOpacity={0.6}
+                      />
+                      
+                      {/* Item Icon/Text */}
+                      <Text
+                        text={getItemIcon(marker.itemId)}
+                        fontSize={16}
+                        fill="white"
+                        x={-8}
+                        y={-8}
+                        fontFamily="Arial"
+                      />
+                      
+                      {/* Item Name Label */}
+                      <Group y={25}>
+                        <Rect
+                          width={getItemName(marker.itemId).length * 8 + 10}
+                          height={20}
+                          fill="rgba(0,0,0,0.8)"
+                          cornerRadius={4}
+                          x={-(getItemName(marker.itemId).length * 4 + 5)}
+                        />
+                        <Text
+                          text={getItemName(marker.itemId)}
+                          fontSize={12}
+                          fill="white"
+                          x={-(getItemName(marker.itemId).length * 4)}
+                          y={4}
+                          fontFamily="Arial"
+                        />
+                      </Group>
+                    </Group>
                   ))}
                 </Layer>
               </Stage>
-            </SpacePanel>
+            </div>
 
             {/* Markers Panel */}
-            <SpacePanel variant="default" className="w-80 p-4">
-              <h3 className="font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+            <div className="w-80 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+              <h3 className="font-semibold text-slate-400 mb-4 flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                Crewmate Markers ({markers.length})
-                <CrewmateIcon color="cyan" size="sm" />
+                Item Markers ({markers.length})
               </h3>
               
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {markers.length === 0 ? (
-                  <p className="text-gray-400 text-sm text-center py-8 flex flex-col items-center gap-2">
-                    <CrewmateIcon color="blue" size="md" />
-                    No crewmate markers added yet. Click "Add Crewmate Marker" to start placing items on your spaceship map.
+                  <p className="text-gray-400 text-sm text-center py-8">
+                    No markers added yet. Click "Add Marker" to start placing items on your map.
                   </p>
                 ) : (
-                  markers.map((marker, index) => (
-                    <SpacePanel
+                  markers.map((marker) => (
+                    <div
                       key={marker.id}
-                      variant={selectedMarker === marker.id ? "control" : "default"}
-                      className={`p-3 cursor-pointer transition-all ${
-                        selectedMarker === marker.id ? 'border-cyan-400' : 'hover:border-cyan-400/50'
+                      className={`p-3 rounded-lg border transition-all cursor-pointer ${
+                        selectedMarker === marker.id
+                          ? 'border-slate-400 bg-slate-400/10'
+                          : 'border-gray-600 hover:border-slate-400/50'
                       }`}
                       onClick={() => setSelectedMarker(marker.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <CrewmateIcon color={getMarkerColor(index)} size="sm" />
+                          <span className="text-lg">{getItemIcon(marker.itemId)}</span>
                           <div>
                             <p className="font-medium text-white text-sm">
                               {getItemName(marker.itemId)}
@@ -768,64 +705,58 @@ export const VisualMapView: React.FC<VisualMapViewProps> = ({
                         </div>
                         
                         <div className="flex items-center gap-1">
-                          <SpaceButton
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleMarkerVisibility(marker.id);
                             }}
-                            variant="secondary"
-                            size="sm"
-                            className={`p-1 ${marker.visible ? 'text-green-400' : 'text-gray-500'}`}
+                            className={`p-1 rounded hover:bg-gray-700 transition-colors ${
+                              marker.visible ? 'text-green-400' : 'text-gray-500'
+                            }`}
+                            title={marker.visible ? 'Hide marker' : 'Show marker'}
                           >
                             {marker.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                          </SpaceButton>
+                          </button>
                           
-                          <SpaceButton
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               removeMarker(marker.id);
                             }}
-                            variant="danger"
-                            size="sm"
-                            className="p-1"
+                            className="p-1 rounded hover:bg-gray-700 transition-colors text-red-400"
+                            title="Remove marker"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </SpaceButton>
+                          </button>
                         </div>
                       </div>
-                    </SpacePanel>
+                    </div>
                   ))
                 )}
               </div>
-            </SpacePanel>
+            </div>
           </div>
         ) : currentMap ? (
-          <SpacePanel variant="default" className="p-12 text-center">
-            <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-400 flex items-center justify-center gap-2">
-              <CrewmateIcon color="cyan" size="sm" />
-              Loading spaceship map...
-              <CrewmateIcon color="blue" size="sm" />
-            </p>
-          </SpacePanel>
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-12 border border-gray-500/30 text-center">
+            <div className="w-16 h-16 border-4 border-slate-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading map image...</p>
+          </div>
         ) : (
-          <SpacePanel variant="default" className="p-12 text-center">
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-12 border border-gray-500/30 text-center">
             <Map className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400 mb-4 flex items-center justify-center gap-2">
-              <CrewmateIcon color="blue" size="sm" />
+            <p className="text-gray-400 mb-4">
               No map selected. Go back to maps list to select or create a map.
-              <CrewmateIcon color="green" size="sm" />
             </p>
-            <SpaceButton
+            <button
               onClick={() => setCurrentMap(null)}
-              variant="primary"
+              className="px-6 py-3 bg-gradient-to-r from-slate-500 to-gray-600 rounded-lg font-medium hover:from-slate-400 hover:to-gray-500 transition-all flex items-center gap-2 text-white mx-auto"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Maps
-            </SpaceButton>
-          </SpacePanel>
+            </button>
+          </div>
         )}
       </div>
-    </SpaceBackground>
+    </div>
   );
 };
