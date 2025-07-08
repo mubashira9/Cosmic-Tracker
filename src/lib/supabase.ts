@@ -3,26 +3,22 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Debug logging for environment variables
-console.log('Supabase URL:', supabaseUrl ? 'Present' : 'Missing');
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Present' : 'Missing');
-
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables:');
-  console.error('VITE_SUPABASE_URL:', supabaseUrl);
-  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '[PRESENT]' : '[MISSING]');
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-// Validate URL format
-try {
-  new URL(supabaseUrl);
-} catch (error) {
-  console.error('Invalid Supabase URL format:', supabaseUrl);
-  throw new Error('Invalid Supabase URL format. Please check your VITE_SUPABASE_URL in .env file.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'apikey': supabaseAnonKey,
+    },
+  },
+});
 
 export type Database = {
   public: {
@@ -47,6 +43,10 @@ export type Database = {
           updated_at: string;
           group_id: string | null;
           container_id: string | null;
+          encryption_salt: string | null;
+          is_pin_protected: boolean;
+          pin_encrypted_data: string | null;
+          pin_salt: string | null;
         };
         Insert: {
           id?: string;
@@ -67,6 +67,10 @@ export type Database = {
           updated_at?: string;
           group_id?: string | null;
           container_id?: string | null;
+          encryption_salt?: string | null;
+          is_pin_protected?: boolean;
+          pin_encrypted_data?: string | null;
+          pin_salt?: string | null;
         };
         Update: {
           id?: string;
@@ -87,6 +91,10 @@ export type Database = {
           updated_at?: string;
           group_id?: string | null;
           container_id?: string | null;
+          encryption_salt?: string | null;
+          is_pin_protected?: boolean;
+          pin_encrypted_data?: string | null;
+          pin_salt?: string | null;
         };
       };
       item_history: {
@@ -99,6 +107,7 @@ export type Database = {
           old_values: any;
           new_values: any;
           created_at: string;
+          encryption_salt: string | null;
         };
         Insert: {
           id?: string;
@@ -109,6 +118,7 @@ export type Database = {
           old_values?: any;
           new_values?: any;
           created_at?: string;
+          encryption_salt?: string | null;
         };
         Update: {
           id?: string;
@@ -119,6 +129,7 @@ export type Database = {
           old_values?: any;
           new_values?: any;
           created_at?: string;
+          encryption_salt?: string | null;
         };
       };
       item_reminders: {
