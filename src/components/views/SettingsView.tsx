@@ -226,7 +226,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
         <div className="space-y-6">
           {/* Account Info */}
-          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+          <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h2 className="text-lg font-semibold text-slate-400 mb-3 flex items-center gap-2">
               <User className="w-5 h-5" />
               Account Information
@@ -245,7 +245,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* Data Export */}
-          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+          <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h2 className="text-lg font-semibold text-slate-400 mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5" />
               Data Export
@@ -270,7 +270,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* Data Statistics */}
-          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+          <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h2 className="text-lg font-semibold text-slate-400 mb-3 flex items-center gap-2">
               <Database className="w-5 h-5" />
               Data Statistics
@@ -351,7 +351,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* App Info */}
-          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+          <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h2 className="text-lg font-semibold text-slate-400 mb-3">About Cosmic Tracker</h2>
             <div className="text-sm text-gray-300 space-y-2">
               <p>Version: 1.0.0</p>
