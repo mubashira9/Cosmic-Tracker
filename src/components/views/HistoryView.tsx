@@ -109,7 +109,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 text-white relative">
       <StarField />
       
       <div className="relative z-10 p-4 max-w-md mx-auto">
@@ -146,7 +146,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             history.map((entry) => (
               <div
                 key={entry.id}
-                className={`bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-4 border ${getActionColor(entry.action)}`}
+                className={`bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border ${getActionColor(entry.action)}`}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
@@ -200,7 +200,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         </div>
 
         {history.length > 0 && (
-          <div className="mt-8 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30">
+          <div className="mt-8 bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h3 className="text-sm font-medium text-cyan-300 mb-2">Activity Summary</h3>
             <div className="text-sm text-gray-300">
               <p>📊 Total Activities: {history.length}</p>

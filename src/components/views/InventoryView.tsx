@@ -53,7 +53,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 text-white relative">
       <StarField />
       
       <div className="relative z-10 p-4 max-w-md mx-auto">
@@ -85,7 +85,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search your cosmic inventory..."
-              className="w-full pl-10 pr-4 py-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white placeholder-gray-400 focus:border-slate-400 focus:outline-none backdrop-blur-sm"
+              className="w-full pl-10 pr-4 py-3 bg-black bg-opacity-70 border border-gray-500/30 rounded-xl text-white placeholder-gray-400 focus:border-slate-400 focus:outline-none backdrop-blur-sm"
             />
           </div>
 
@@ -95,7 +95,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full p-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white focus:border-slate-400 focus:outline-none text-sm backdrop-blur-sm"
+                className="w-full p-3 bg-black bg-opacity-70 border border-gray-500/30 rounded-xl text-white focus:border-slate-400 focus:outline-none text-sm backdrop-blur-sm"
               >
                 <option value="all">🌌 All</option>
                 {categories.map(cat => (
@@ -111,7 +111,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               <select
                 value={filterTag}
                 onChange={(e) => setFilterTag(e.target.value)}
-                className="w-full p-3 bg-black bg-opacity-50 border border-gray-500/30 rounded-xl text-white focus:border-slate-400 focus:outline-none text-sm backdrop-blur-sm"
+                className="w-full p-3 bg-black bg-opacity-70 border border-gray-500/30 rounded-xl text-white focus:border-slate-400 focus:outline-none text-sm backdrop-blur-sm"
               >
                 <option value="all">🏷️ All Tags</option>
                 {getAllTags().map(tag => (
@@ -141,7 +141,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 {/* Compact View */}
                 <div
                   onClick={() => onItemClick(item)}
-                  className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-slate-400/50 transition-all cursor-pointer"
+                  className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-slate-400/50 transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     {/* Show lock icon for PIN-protected items, otherwise show image or category icon */}
@@ -172,7 +172,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                 {/* Expanded View */}
                 {expandedItem === item.id && (item.has_pin ? unlockedItems.has(item.id) : true) && (
-                  <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 ml-4">
+                  <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-slate-400/50 ml-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
@@ -270,7 +270,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         </div>
 
         {items.length > 0 && (
-          <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
+          <div className="mt-8 bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h3 className="text-sm font-medium text-slate-400 mb-2">Mission Stats</h3>
             <div className="text-sm text-gray-300">
               <p>🚀 Total Items: {items.length}</p>

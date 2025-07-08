@@ -152,7 +152,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 text-white relative">
       <StarField />
       
       <div className="relative z-10 p-4 max-w-md mx-auto">
@@ -187,7 +187,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
         </div>
 
         {showAddForm && (
-          <div className="mb-6 bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-4 border border-purple-500">
+          <div className="mb-6 bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-cyan-300">Add New Reminder</h3>
               <button
@@ -275,7 +275,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
               return (
                 <div
                   key={reminder.id}
-                  className={`bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-4 border ${status.bgColor}`}
+                  className={`bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border ${status.bgColor}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -348,7 +348,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
         </div>
 
         {reminders.length > 0 && (
-          <div className="mt-8 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30">
+          <div className="mt-8 bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30">
             <h3 className="text-sm font-medium text-cyan-300 mb-2">Reminder Summary</h3>
             <div className="text-sm text-gray-300">
               <p>📊 Total Reminders: {reminders.length}</p>

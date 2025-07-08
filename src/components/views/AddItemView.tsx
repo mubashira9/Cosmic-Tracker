@@ -142,7 +142,7 @@ export const AddItemView: React.FC<AddItemViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 text-white relative">
       <StarField />
       
       <div className="relative z-10 p-4 max-w-md mx-auto">
@@ -159,7 +159,7 @@ export const AddItemView: React.FC<AddItemViewProps> = ({
           </h1>
         </div>
 
-        <div className="bg-black bg-opacity-40 backdrop-blur-sm rounded-2xl p-6 border border-purple-500">
+        <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-2xl p-6 border border-gray-500/30">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2 text-cyan-300">Item Name *</label>
