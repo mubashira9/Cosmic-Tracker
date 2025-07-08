@@ -24,7 +24,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
   user
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showRadialNav, setShowRadialNav] = useState(false);
 
   const getAllTags = () => {
     const allTags = new Set<string>();
@@ -42,12 +41,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
     
     return matchesSearch;
   });
-
-  // Clear search when showing radial nav
-  const handleShowRadialNav = () => {
-    setSearchTerm('');
-    setShowRadialNav(true);
-  };
 
   // Get upcoming reminders (within next 7 days)
   const upcomingReminders = reminders.filter(reminder => {
@@ -111,12 +104,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
 
-        {/* Radial Navigation */}
+        {/* Always-Visible Radial Navigation */}
         {!searchTerm && (
           <div className="relative flex items-center justify-center mb-8" style={{ height: '400px' }}>
             {/* Central Add Button */}
             <button
-              onClick={showRadialNav ? () => onViewChange('add') : handleShowRadialNav}
+              onClick={() => onViewChange('add')}
               className="relative z-20 w-20 h-20 bg-gradient-to-r from-slate-500 to-gray-600 rounded-full font-bold hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center shadow-2xl text-white group"
             >
               <Plus className="w-8 h-8" />
@@ -125,89 +118,76 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             </button>
 
-            {/* Orbiting Navigation Options */}
-            {showRadialNav && (
-              <>
-                {/* Close button */}
+            {/* Navigation items in clockwise radial pattern - always visible */}
+            {[
+              { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: -90 }, // 12 o'clock
+              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -45 }, // 1:30
+              { icon: Archive, label: 'Virtual Drawers', view: 'virtual-drawers', color: 'from-purple-600 to-violet-600', angle: 0 }, // 3 o'clock
+              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 45 }, // 4:30
+              { icon: Route, label: 'Virtual Tour', view: 'virtual-tour', color: 'from-cyan-600 to-blue-600', angle: 90 }, // 6 o'clock
+              { icon: Camera, label: 'Photo Search', view: 'photo-search', color: 'from-pink-600 to-rose-600', angle: 135 }, // 7:30
+              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 180 }, // 9 o'clock
+              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 225 }, // 10:30
+            ].map((item, index) => {
+              const radius = 140;
+              const radian = (item.angle * Math.PI) / 180;
+              const x = Math.cos(radian) * radius;
+              const y = Math.sin(radian) * radius;
+              
+              return (
                 <button
-                  onClick={() => setShowRadialNav(false)}
-                  className="absolute top-0 right-0 z-30 w-8 h-8 bg-red-600/20 hover:bg-red-600/40 rounded-full flex items-center justify-center transition-all border border-red-500/50"
+                  key={item.view}
+                  onClick={() => onViewChange(item.view)}
+                  className={`absolute w-16 h-16 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-pulse`}
+                  style={{
+                    left: `calc(50% + ${x}px - 32px)`,
+                    top: `calc(50% + ${y}px - 32px)`,
+                    animationDelay: `${index * 0.1}s`,
+                    animationDuration: '2s'
+                  }}
                 >
-                  <X className="w-4 h-4 text-red-400" />
+                  <item.icon className="w-6 h-6" />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    {item.label}
+                    {item.view === 'reminders' && upcomingReminders.length > 0 && (
+                      <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                        {upcomingReminders.length}
+                      </span>
+                    )}
+                  </div>
                 </button>
+              );
+            })}
 
-                {/* Navigation items in radial pattern */}
-                {[
-                  { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: 0 },
-                  { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: 45 },
-                  { icon: Archive, label: 'Virtual Drawers', view: 'virtual-drawers', color: 'from-purple-600 to-violet-600', angle: 90 },
-                  { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 135 },
-                  { icon: Route, label: 'Virtual Tour', view: 'virtual-tour', color: 'from-cyan-600 to-blue-600', angle: 180 },
-                  { icon: Camera, label: 'Photo Search', view: 'photo-search', color: 'from-pink-600 to-rose-600', angle: 225 },
-                  { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 270 },
-                  { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 315 },
-                ].map((item, index) => {
-                  const radius = 140;
-                  const radian = (item.angle * Math.PI) / 180;
-                  const x = Math.cos(radian) * radius;
-                  const y = Math.sin(radian) * radius;
-                  
-                  return (
-                    <button
-                      key={item.view}
-                      onClick={() => onViewChange(item.view)}
-                      className={`absolute w-16 h-16 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-pulse`}
-                      style={{
-                        left: `calc(50% + ${x}px - 32px)`,
-                        top: `calc(50% + ${y}px - 32px)`,
-                        animationDelay: `${index * 0.1}s`,
-                        animationDuration: '2s'
-                      }}
-                    >
-                      <item.icon className="w-6 h-6" />
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                        {item.label}
-                        {item.view === 'reminders' && upcomingReminders.length > 0 && (
-                          <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                            {upcomingReminders.length}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-
-                {/* Secondary ring for additional options */}
-                {[
-                  { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: 22.5 },
-                  { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 67.5 },
-                ].map((item, index) => {
-                  const radius = 200;
-                  const radian = (item.angle * Math.PI) / 180;
-                  const x = Math.cos(radian) * radius;
-                  const y = Math.sin(radian) * radius;
-                  
-                  return (
-                    <button
-                      key={item.view}
-                      onClick={() => onViewChange(item.view)}
-                      className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-pulse`}
-                      style={{
-                        left: `calc(50% + ${x}px - 24px)`,
-                        top: `calc(50% + ${y}px - 24px)`,
-                        animationDelay: `${(index + 8) * 0.1}s`,
-                        animationDuration: '2s'
-                      }}
-                    >
-                      <item.icon className="w-5 h-5" />
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                        {item.label}
-                      </div>
-                    </button>
-                  );
-                })}
-              </>
-            )}
+            {/* Secondary ring for additional options - always visible */}
+            {[
+              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: -67.5 }, // Between 12 and 1:30
+              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 22.5 }, // Between 1:30 and 3
+            ].map((item, index) => {
+              const radius = 200;
+              const radian = (item.angle * Math.PI) / 180;
+              const x = Math.cos(radian) * radius;
+              const y = Math.sin(radian) * radius;
+              
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => onViewChange(item.view)}
+                  className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-pulse`}
+                  style={{
+                    left: `calc(50% + ${x}px - 24px)`,
+                    top: `calc(50% + ${y}px - 24px)`,
+                    animationDelay: `${(index + 8) * 0.1}s`,
+                    animationDuration: '2s'
+                  }}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    {item.label}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 
