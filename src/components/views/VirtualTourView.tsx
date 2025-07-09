@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Route, ArrowRight, ArrowLeft, Home, LogOut, Package, MapPin, Eye } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Route, ArrowRight, ArrowLeft, Home, LogOut, Package, MapPin, Eye, Plus, Upload, Save, X, Map } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabase';
 import { StarField } from '../ui/StarField';
 import type { Item } from '../SpaceTracker';
 
@@ -28,6 +29,16 @@ interface Zone {
   items: Item[];
 }
 
+interface VisualMap {
+  id?: string;
+  user_id: string;
+  name: string;
+  image_url: string;
+  markers: any[];
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const VirtualTourView: React.FC<VirtualTourViewProps> = ({
   items,
   onBack,
@@ -37,6 +48,10 @@ export const VirtualTourView: React.FC<VirtualTourViewProps> = ({
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [currentZone, setCurrentZone] = useState<string | null>(null);
   const [tourHistory, setTourHistory] = useState<string[]>([]);
+  const [showCreateMap, setShowCreateMap] = useState(false);
+  const [newMapName, setNewMapName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Mock rooms data - in a real implementation, this would come from the database
   const rooms: Room[] = [
@@ -192,6 +207,54 @@ export const VirtualTourView: React.FC<VirtualTourViewProps> = ({
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageUrl = event.target?.result as string;
+        createVisualMap(imageUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const createVisualMap = async (imageUrl: string) => {
+    if (!user || !newMapName.trim()) return;
+
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('visual_maps')
+        .insert([
+          {
+            user_id: user.id,
+            name: newMapName.trim(),
+            image_url: imageUrl,
+            markers: [],
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating visual map:', error);
+        alert('Error creating visual map. Please try again.');
+        return;
+      }
+
+      alert(`Visual map "${newMapName}" created successfully! You can now access it from the Visual Maps section.`);
+      setNewMapName('');
+      setShowCreateMap(false);
+    } catch (error) {
+      console.error('Error creating visual map:', error);
+      alert('Error creating visual map. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getCurrentRoom = () => rooms.find(r => r.id === currentRoom);
   const getCurrentZone = () => {
     const room = getCurrentRoom();
@@ -233,6 +296,91 @@ export const VirtualTourView: React.FC<VirtualTourViewProps> = ({
               Explore your spaces virtually! Click on rooms to enter them, then explore zones within each room 
               to see what items are stored there. Like Google Street View for your home inventory.
             </p>
+          </div>
+
+          {/* Create Visual Map Section */}
+          <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-blue-500/30 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold text-blue-300 flex items-center gap-2">
+                <Map className="w-5 h-5" />
+                Create Visual House Map
+              </h2>
+              <button
+                onClick={() => setShowCreateMap(!showCreateMap)}
+                className="p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 transition-colors border border-blue-500/50"
+              >
+                <Plus className="w-4 h-4 text-blue-400" />
+              </button>
+            </div>
+            
+            <p className="text-gray-300 text-sm mb-4">
+              Upload a floor plan, house layout, or room diagram to create an interactive visual map. 
+              You can then place item markers directly on your house layout for precise location tracking.
+            </p>
+
+            {showCreateMap && (
+              <div className="space-y-4 p-4 bg-blue-900/10 rounded-lg border border-blue-500/30">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-blue-300">
+                    Map Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newMapName}
+                    onChange={(e) => setNewMapName(e.target.value)}
+                    placeholder="e.g., House Floor Plan, Living Room Layout"
+                    className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-blue-300">
+                    Upload House Layout
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={!newMapName.trim() || loading}
+                    className="w-full p-4 border-2 border-dashed border-blue-600/50 rounded-lg hover:border-blue-400/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center gap-3 text-blue-300 hover:text-blue-200"
+                  >
+                    <Upload className="w-8 h-8" />
+                    <div className="text-center">
+                      <p className="font-medium">Click to upload floor plan or house layout</p>
+                      <p className="text-sm text-gray-400">JPG, PNG, or other image formats</p>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setShowCreateMap(false);
+                      setNewMapName('');
+                    }}
+                    className="flex-1 p-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                {loading && (
+                  <div className="text-center py-4">
+                    <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-blue-300 text-sm">Creating visual map...</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="text-xs text-gray-400 mt-3">
+              💡 Tip: After creating a visual map, go to "Visual Maps" section to add item markers to your house layout
+            </div>
           </div>
 
           {/* Room Selection */}
