@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, X, Edit, Trash2, Package, LogOut, Tag, Star, Check } from 'lucide-react';
+import { Users, Plus, X, Edit, Trash2, Package, LogOut, Tag, Star, Check, Map, Lock, ArrowLeft } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { StarField } from '../ui/StarField';
@@ -11,6 +11,8 @@ interface GroupsViewProps {
   onSignOut: () => void;
   user: User | null;
   onItemsUpdated: () => void;
+  onViewOnMap?: (item: Item) => void;
+  onItemClick?: (item: Item) => void;
 }
 
 interface ItemGroup {
@@ -29,7 +31,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
   onBack,
   onSignOut,
   user,
-  onItemsUpdated
+  onItemsUpdated,
+  onViewOnMap,
+  onItemClick
 }) => {
   const [groups, setGroups] = useState<ItemGroup[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -42,6 +46,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [viewingGroup, setViewingGroup] = useState<ItemGroup | null>(null);
 
   const groupColors = [
     { id: 'blue', name: 'Blue', class: 'from-blue-500 to-blue-600' },
@@ -162,15 +167,38 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     }
   };
 
-  const addItemToGroup = async (itemId: string, groupId: string) => {
+  const addItemToGroup = async (itemId: string, groupId: string, shouldReplace = false) => {
     try {
       setLoading(true);
 
+      // Get current item to check existing groups
+      const item = items.find(i => i.id === itemId);
+      if (!item) return;
+
+      let newGroupIds: string[] = [];
+      
+      if (shouldReplace) {
+        // Replace all groups with just this one
+        newGroupIds = [groupId];
+      } else {
+        // Add to existing groups (if any)
+        const currentGroups = item.group_id ? [item.group_id] : [];
+        if (!currentGroups.includes(groupId)) {
+          newGroupIds = [...currentGroups, groupId];
+        } else {
+          // Already in this group
+          setLoading(false);
+          setShowItemSelector(null);
+          return;
+        }
+      }
+
+      // For now, we'll store only the first group in group_id field
+      // In a real implementation, you'd want to create a junction table for many-to-many relationships
       const { error } = await supabase
         .from('items')
         .update({ group_id: groupId })
         .eq('id', itemId);
-
       if (error) {
         console.error('Error adding item to group:', error);
         alert('Error adding item to group. Please try again.');
@@ -187,10 +215,12 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     }
   };
 
-  const removeItemFromGroup = async (itemId: string) => {
+  const removeItemFromGroup = async (itemId: string, groupId: string) => {
     try {
       setLoading(true);
 
+      // For now, just remove the group_id (in a real implementation with junction table, 
+      // you'd remove the specific group relationship)
       const { error } = await supabase
         .from('items')
         .update({ group_id: null })
@@ -223,6 +253,151 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
     return groupColors.find(c => c.id === colorId)?.class || 'from-gray-500 to-gray-600';
   };
 
+  // Group detail view
+  if (viewingGroup) {
+    const groupItems = getGroupItems(viewingGroup.id);
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
+        <StarField />
+        
+        <div className="relative z-10 p-4 max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6 pt-4">
+            <button
+              onClick={() => setViewingGroup(null)}
+              className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-gray-500/30 flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Groups
+            </button>
+            <h1 className="text-xl font-bold flex items-center gap-2 text-emerald-400">
+              <span className="text-2xl">{viewingGroup.icon}</span>
+              {viewingGroup.name}
+            </h1>
+            <button
+              onClick={onSignOut}
+              className="p-2 rounded-full bg-red-600/20 hover:bg-red-600/30 transition-colors border border-red-500/50"
+              title="Sign Out"
+            >
+              <LogOut className="w-5 h-5 text-red-400" />
+            </button>
+          </div>
+
+          {/* Group Info */}
+          <div className={`bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-emerald-500/30 mb-6 bg-gradient-to-r ${getColorClass(viewingGroup.color)} bg-opacity-10`}>
+            <h2 className="text-lg font-semibold text-emerald-300 mb-2">{viewingGroup.name}</h2>
+            <p className="text-gray-300 text-sm mb-3">{viewingGroup.description}</p>
+            <div className="flex items-center gap-4 text-sm text-gray-400">
+              <span>{groupItems.length} items in this group</span>
+              <span>Created {new Date(viewingGroup.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
+
+          {/* Add Items Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => setShowItemSelector(viewingGroup.id)}
+              className="w-full p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl font-medium hover:from-emerald-400 hover:to-teal-500 transition-all flex items-center justify-center gap-2 text-white"
+            >
+              <Plus className="w-5 h-5" />
+              Add Items to Group
+            </button>
+          </div>
+
+          {/* Items List */}
+          <div className="space-y-4">
+            {groupItems.length === 0 ? (
+              <div className="bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-8 border border-gray-500/30 text-center">
+                <Package className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400">No items in this group yet.</p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Click "Add Items to Group" to start organizing.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-emerald-400 mb-4">
+                  Items in {viewingGroup.name} ({groupItems.length})
+                </h3>
+                {groupItems.map(item => (
+                  <div key={item.id} className="bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-emerald-400/50 transition-all">
+                    <div className="flex items-center gap-4">
+                      {/* Item Image/Icon */}
+                      {item.has_pin ? (
+                        <div className="w-16 h-16 rounded-lg bg-red-600/20 border border-red-500/50 flex items-center justify-center flex-shrink-0">
+                          <Lock className="w-8 h-8 text-red-400" />
+                        </div>
+                      ) : item.item_image_url ? (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-600 flex-shrink-0">
+                          <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <span className="text-2xl">{item.category.icon}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-emerald-300">{item.name}</h4>
+                          {item.is_starred && <Star className="w-4 h-4 text-yellow-400 fill-current" />}
+                          {item.has_pin && <Lock className="w-4 h-4 text-red-400" />}
+                        </div>
+                        <p className="text-sm text-gray-400 mb-2">{item.location}</p>
+                        {item.description && (
+                          <p className="text-sm text-gray-300 mb-2">{item.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="bg-gray-700 px-2 py-1 rounded">{item.category.name}</span>
+                          <span>Added {new Date(item.created_at).toLocaleDateString()}</span>
+                        </div>
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {item.tags.map(tag => (
+                              <span key={tag} className="px-2 py-1 bg-emerald-600/30 rounded-full text-xs text-emerald-200">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-col gap-2">
+                        {onViewOnMap && (
+                          <button
+                            onClick={() => {
+                              if (item.has_pin && onItemClick) {
+                                onItemClick(item);
+                              } else if (onViewOnMap) {
+                                onViewOnMap(item);
+                              }
+                            }}
+                            className="p-2 bg-blue-600/20 hover:bg-blue-600/30 rounded-lg transition-colors border border-blue-500/50 text-blue-400"
+                            title="View on Map"
+                          >
+                            <Map className="w-4 h-4" />
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={() => removeItemFromGroup(item.id, viewingGroup.id)}
+                          className="p-2 bg-red-600/20 hover:bg-red-600/30 rounded-lg transition-colors border border-red-500/50 text-red-400"
+                          title="Remove from group"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900 text-white relative">
       <StarField />
@@ -391,7 +566,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
                 {getUngroupedItems().map(item => (
                   <div
                     key={item.id}
-                    onClick={() => addItemToGroup(item.id, showItemSelector)}
+                    onClick={() => addItemToGroup(item.id, showItemSelector, false)}
                     className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-600/50 hover:border-emerald-400/50 cursor-pointer transition-all"
                   >
                     {item.item_image_url ? (
@@ -412,7 +587,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
                 
                 {getUngroupedItems().length === 0 && (
                   <p className="text-gray-400 text-center py-4">
-                    All items are already in groups
+                    No available items to add
                   </p>
                 )}
               </div>
@@ -449,7 +624,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
                   <div key={group.id} className="space-y-2">
                     <div 
                       className={`bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 hover:border-emerald-400/50 transition-all cursor-pointer`}
-                      onClick={() => setSelectedGroup(isSelected ? null : group.id)}
+                      onClick={() => setViewingGroup(group)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -491,63 +666,6 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
                         </div>
                       </div>
                     </div>
-
-                    {/* Show items in this group */}
-                    {isSelected && (
-                      <div className="ml-4 space-y-2">
-                        {groupItems.length === 0 ? (
-                          <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-600/30 text-center">
-                            <p className="text-gray-400 text-sm">No items in this group yet.</p>
-                            <button
-                              onClick={() => setShowItemSelector(group.id)}
-                              className="mt-2 px-3 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 rounded text-emerald-300 text-sm transition-colors"
-                            >
-                              Add Items
-                            </button>
-                          </div>
-                        ) : (
-                          groupItems.map(item => (
-                            <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-600/50 group">
-                              {item.item_image_url ? (
-                                <div className="w-10 h-10 rounded overflow-hidden border border-gray-600 flex-shrink-0">
-                                  <img src={item.item_image_url} alt={item.name} className="w-full h-full object-cover" />
-                                </div>
-                              ) : (
-                                <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-lg">{item.category.icon}</span>
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm text-white truncate">{item.name}</p>
-                                  {item.is_starred && <Star className="w-3 h-3 text-yellow-400 fill-current flex-shrink-0" />}
-                                </div>
-                                <p className="text-xs text-gray-400 truncate">{item.location}</p>
-                                {item.tags && item.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {item.tags.slice(0, 3).map(tag => (
-                                      <span key={tag} className="px-1 py-0.5 bg-emerald-600/30 rounded text-xs text-emerald-200">
-                                        #{tag}
-                                      </span>
-                                    ))}
-                                    {item.tags.length > 3 && (
-                                      <span className="text-xs text-gray-500">+{item.tags.length - 3}</span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                              <button
-                                onClick={() => removeItemFromGroup(item.id)}
-                                className="p-1 hover:bg-gray-700 rounded transition-colors text-red-400 opacity-0 group-hover:opacity-100"
-                                title="Remove from group"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -560,7 +678,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({
           <div className="mt-8 bg-black bg-opacity-50 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30">
             <h3 className="text-lg font-semibold text-yellow-300 mb-3">Ungrouped Items ({getUngroupedItems().length})</h3>
             <p className="text-gray-300 text-sm mb-3">
-              These items aren't in any group yet. Click on a group's + button to add them.
+              These items aren't in any group yet. Click on a group to view it, then add items.
             </p>
             <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
               {getUngroupedItems().slice(0, 10).map(item => (

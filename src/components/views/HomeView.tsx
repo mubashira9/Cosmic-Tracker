@@ -124,8 +124,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
               { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -45 }, // 1:30
               { icon: Archive, label: 'Virtual Drawers', view: 'virtual-drawers', color: 'from-purple-600 to-violet-600', angle: 0 }, // 3 o'clock
               { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 45 }, // 4:30
-              { icon: Route, label: 'Virtual Tour', view: 'virtual-tour', color: 'from-cyan-600 to-blue-600', angle: 90 }, // 6 o'clock
-              { icon: Camera, label: 'Photo Search', view: 'photo-search', color: 'from-pink-600 to-rose-600', angle: 135 }, // 7:30
               { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 180 }, // 9 o'clock
               { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 225 }, // 10:30
             ].map((item, index) => {

@@ -13,10 +13,7 @@ import { HistoryView } from './views/HistoryView';
 import { RemindersView } from './views/RemindersView';
 import { SettingsView } from './views/SettingsView';
 import { VisualMapView } from './views/VisualMapView';
-import { VirtualDrawersView } from './views/VirtualDrawersView';
 import { GroupsView } from './views/GroupsView';
-import { VirtualTourView } from './views/VirtualTourView';
-import { PhotoSearchView } from './views/PhotoSearchView';
 import { Help } from './Help';
 import { PinPrompt } from './ui/PinPrompt';
 import { StarField } from './ui/StarField';
@@ -393,17 +390,6 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
           />
         );
 
-      case 'virtual-drawers':
-        return (
-          <VirtualDrawersView
-            items={items}
-            onBack={() => handleViewChange('home')}
-            onSignOut={handleSignOut}
-            user={user}
-            onItemsUpdated={loadItems}
-          />
-        );
-
       case 'groups':
         return (
           <GroupsView
@@ -412,29 +398,11 @@ const SpaceTracker: React.FC<SpaceTrackerProps> = ({ showAboutFirst = false, onA
             onSignOut={handleSignOut}
             user={user}
             onItemsUpdated={loadItems}
-          />
-        );
-
-      case 'virtual-tour':
-        return (
-          <VirtualTourView
-            items={items}
-            onBack={() => handleViewChange('home')}
-            onSignOut={handleSignOut}
-            user={user}
-          />
-        );
-
-      case 'photo-search':
-        return (
-          <PhotoSearchView
-            items={items}
-            onBack={() => handleViewChange('home')}
-            onSignOut={handleSignOut}
+            onViewOnMap={handleViewOnMap}
             onItemClick={handleItemClick}
           />
         );
-      
+
       default:
         return (
           <HomeView
