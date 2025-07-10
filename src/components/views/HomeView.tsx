@@ -106,14 +106,58 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
         {/* Solar System Navigation */}
         {!searchTerm && (
-          <div className="relative flex items-center justify-center mb-8" style={{ height: '450px' }}>
+          <div className="relative flex items-center justify-center mb-8" style={{ height: '500px' }}>
             {/* Orbital paths (visual rings) */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-80 h-80 border border-gray-700/30 rounded-full"></div>
+              <div className="w-60 h-60 border border-gray-700/20 rounded-full"></div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-96 h-96 border border-gray-600/20 rounded-full"></div>
+              <div className="w-80 h-80 border border-gray-600/20 rounded-full"></div>
             </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-96 h-96 border border-gray-500/20 rounded-full"></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-112 h-112 border border-gray-400/15 rounded-full"></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-128 h-128 border border-gray-300/10 rounded-full"></div>
+            </div>
+
+            {/* Add CSS for continuous animations */}
+            <style jsx>{`
+              .orbit-1 { animation: orbit-1 15s linear infinite; }
+              .orbit-2 { animation: orbit-2 20s linear infinite; }
+              .orbit-3 { animation: orbit-3 25s linear infinite; }
+              .orbit-4 { animation: orbit-4 30s linear infinite; }
+              .orbit-5 { animation: orbit-5 35s linear infinite; }
+              .orbit-6 { animation: orbit-6 45s linear infinite; }
+              .orbit-7 { animation: orbit-7 55s linear infinite; }
+              
+              .planet-1 { animation: counter-rotate-1 15s linear infinite reverse; }
+              .planet-2 { animation: counter-rotate-2 20s linear infinite reverse; }
+              .planet-3 { animation: counter-rotate-3 25s linear infinite reverse; }
+              .planet-4 { animation: counter-rotate-4 30s linear infinite reverse; }
+              .planet-5 { animation: counter-rotate-5 35s linear infinite reverse; }
+              .planet-6 { animation: counter-rotate-6 45s linear infinite reverse; }
+              .planet-7 { animation: counter-rotate-7 55s linear infinite reverse; }
+
+              @keyframes orbit-1 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              @keyframes orbit-2 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              @keyframes orbit-3 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              @keyframes orbit-4 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              @keyframes orbit-5 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              @keyframes orbit-6 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              @keyframes orbit-7 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+              
+              @keyframes counter-rotate-1 { from { transform: translateY(-120px) rotate(0deg); } to { transform: translateY(-120px) rotate(-360deg); } }
+              @keyframes counter-rotate-2 { from { transform: translateY(-140px) rotate(0deg); } to { transform: translateY(-140px) rotate(-360deg); } }
+              @keyframes counter-rotate-3 { from { transform: translateY(-160px) rotate(0deg); } to { transform: translateY(-160px) rotate(-360deg); } }
+              @keyframes counter-rotate-4 { from { transform: translateY(-180px) rotate(0deg); } to { transform: translateY(-180px) rotate(-360deg); } }
+              @keyframes counter-rotate-5 { from { transform: translateY(-200px) rotate(0deg); } to { transform: translateY(-200px) rotate(-360deg); } }
+              @keyframes counter-rotate-6 { from { transform: translateY(-225px) rotate(0deg); } to { transform: translateY(-225px) rotate(-360deg); } }
+              @keyframes counter-rotate-7 { from { transform: translateY(-250px) rotate(0deg); } to { transform: translateY(-250px) rotate(-360deg); } }
+            `}</style>
 
             {/* Central Sun (Add Button) */}
             <button
@@ -127,105 +171,101 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             </button>
 
-            {/* Inner Planets (Main Navigation) */}
-            {[
-              { icon: Package, label: '🪐 Inventory', view: 'inventory', color: 'from-gray-500 to-gray-700', planet: 'Mercury', size: 'w-12 h-12', speed: '20s' },
-              { icon: Map, label: '🌍 Visual Maps', view: 'visual-map', color: 'from-blue-500 to-blue-700', planet: 'Venus', size: 'w-14 h-14', speed: '25s' },
-              { icon: Users, label: '🔴 Item Groups', view: 'groups', color: 'from-red-500 to-red-700', planet: 'Mars', size: 'w-13 h-13', speed: '30s' },
-              { icon: Bell, label: '🟠 Reminders', view: 'reminders', color: 'from-orange-500 to-orange-700', planet: 'Jupiter', size: 'w-16 h-16', speed: '35s' },
-              { icon: History, label: '🪐 History', view: 'history', color: 'from-yellow-600 to-yellow-800', planet: 'Saturn', size: 'w-15 h-15', speed: '40s' },
-            ].map((planet, index) => (
-              <div
-                key={planet.view}
-                className="absolute inset-0 flex items-center justify-center animate-spin"
-                style={{
-                  animationDuration: planet.speed,
-                  animationDelay: `${index * 2}s`,
-                  animationDirection: 'normal'
-                }}
+            {/* Planet 1 - Inventory (Mercury) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-1">
+              <button
+                onClick={() => onViewChange('inventory')}
+                className="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-700 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group planet-1"
               >
-                <button
-                  onClick={() => onViewChange(planet.view)}
-                  className={`${planet.size} bg-gradient-to-r ${planet.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group relative`}
-                  style={{
-                    transform: `translateY(-${140 + index * 20}px)`,
-                    animation: `counter-rotate-${planet.speed} ${planet.speed} linear infinite reverse`
-                  }}
-                >
-                  <planet.icon className="w-5 h-5" />
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30 pointer-events-none">
-                    {planet.label}
-                    {planet.view === 'reminders' && upcomingReminders.length > 0 && (
-                      <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                        {upcomingReminders.length}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              </div>
-            ))}
+                <Package className="w-5 h-5" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  🪐 Inventory
+                </div>
+              </button>
+            </div>
 
-            {/* Outer Planets (Secondary Navigation) */}
-            {[
-              { icon: Settings, label: '⚙️ Settings', view: 'settings', color: 'from-gray-600 to-slate-600', size: 'w-10 h-10', speed: '50s' },
-              { icon: HelpCircle, label: '💫 Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', size: 'w-10 h-10', speed: '60s' },
-            ].map((planet, index) => (
-              <div
-                key={planet.view}
-                className="absolute inset-0 flex items-center justify-center animate-spin"
-                style={{
-                  animationDuration: planet.speed,
-                  animationDelay: `${index * 5}s`,
-                  animationDirection: 'normal'
-                }}
+            {/* Planet 2 - Visual Maps (Venus) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-2">
+              <button
+                onClick={() => onViewChange('visual-map')}
+                className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group planet-2"
               >
-                <button
-                  onClick={() => onViewChange(planet.view)}
-                  className={`${planet.size} bg-gradient-to-r ${planet.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group relative`}
-                  style={{
-                    transform: `translateY(-${200 + index * 15}px)`,
-                    animation: `counter-rotate-${planet.speed} ${planet.speed} linear infinite reverse`
-                  }}
-                >
-                  <planet.icon className="w-4 h-4" />
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30 pointer-events-none">
-                    {planet.label}
-                  </div>
-                </button>
-              </div>
-            ))}
+                <Map className="w-6 h-6" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  🌍 Visual Maps
+                </div>
+              </button>
+            </div>
 
-            {/* CSS animations for counter-rotation */}
-            <style jsx>{`
-              @keyframes counter-rotate-20s {
-                from { transform: translateY(-140px) rotate(0deg); }
-                to { transform: translateY(-140px) rotate(-360deg); }
-              }
-              @keyframes counter-rotate-25s {
-                from { transform: translateY(-160px) rotate(0deg); }
-                to { transform: translateY(-160px) rotate(-360deg); }
-              }
-              @keyframes counter-rotate-30s {
-                from { transform: translateY(-180px) rotate(0deg); }
-                to { transform: translateY(-180px) rotate(-360deg); }
-              }
-              @keyframes counter-rotate-35s {
-                from { transform: translateY(-200px) rotate(0deg); }
-                to { transform: translateY(-200px) rotate(-360deg); }
-              }
-              @keyframes counter-rotate-40s {
-                from { transform: translateY(-220px) rotate(0deg); }
-                to { transform: translateY(-220px) rotate(-360deg); }
-              }
-              @keyframes counter-rotate-50s {
-                from { transform: translateY(-200px) rotate(0deg); }
-                to { transform: translateY(-200px) rotate(-360deg); }
-              }
-              @keyframes counter-rotate-60s {
-                from { transform: translateY(-215px) rotate(0deg); }
-                to { transform: translateY(-215px) rotate(-360deg); }
-              }
-            `}</style>
+            {/* Planet 3 - Item Groups (Mars) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-3">
+              <button
+                onClick={() => onViewChange('groups')}
+                className="w-13 h-13 bg-gradient-to-r from-red-500 to-red-700 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group planet-3"
+              >
+                <Users className="w-5 h-5" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  🔴 Item Groups
+                </div>
+              </button>
+            </div>
+
+            {/* Planet 4 - Reminders (Jupiter) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-4">
+              <button
+                onClick={() => onViewChange('reminders')}
+                className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group planet-4"
+              >
+                <Bell className="w-6 h-6" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  🟠 Reminders
+                  {upcomingReminders.length > 0 && (
+                    <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                      {upcomingReminders.length}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </div>
+
+            {/* Planet 5 - History (Saturn) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-5">
+              <button
+                onClick={() => onViewChange('history')}
+                className="w-15 h-15 bg-gradient-to-r from-yellow-600 to-yellow-800 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group planet-5"
+              >
+                <History className="w-5 h-5" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  🪐 History
+                </div>
+              </button>
+            </div>
+
+            {/* Planet 6 - Settings (Uranus) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-6">
+              <button
+                onClick={() => onViewChange('settings')}
+                className="w-11 h-11 bg-gradient-to-r from-cyan-500 to-cyan-700 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group planet-6"
+              >
+                <Settings className="w-4 h-4" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  ⚙️ Settings
+                </div>
+              </button>
+            </div>
+
+            {/* Planet 7 - Help (Neptune) */}
+            <div className="absolute inset-0 flex items-center justify-center orbit-7">
+              <button
+                onClick={() => onViewChange('help')}
+                className="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group planet-7"
+              >
+                <HelpCircle className="w-4 h-4" />
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                  💫 Help & Guide
+                </div>
+              </button>
+            </div>
           </div>
         )}
 
