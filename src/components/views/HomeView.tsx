@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock, Map, Archive, Users, Camera, Route, X } from 'lucide-react';
+import { Search, Plus, Package, Globe, LogOut, History, Bell, Settings, HelpCircle, Star, Lock, Map, Users, Camera, Route, X } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StarField } from '../ui/StarField';
 import type { Item, ItemReminder } from '../SpaceTracker';
@@ -121,11 +121,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {/* Navigation items in clockwise radial pattern - always visible */}
             {[
               { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: -90 }, // 12 o'clock
-              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -45 }, // 1:30
-              { icon: Archive, label: 'Virtual Drawers', view: 'virtual-drawers', color: 'from-purple-600 to-violet-600', angle: 0 }, // 3 o'clock
-              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 45 }, // 4:30
-              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 180 }, // 9 o'clock
-              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 225 }, // 10:30
+              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -30 }, // 1 o'clock
+              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 30 }, // 2 o'clock
+              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 150 }, // 8 o'clock
+              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 210 }, // 10 o'clock
             ].map((item, index) => {
               const radius = 140;
               const radian = (item.angle * Math.PI) / 180;
@@ -159,8 +158,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             {/* Secondary ring for additional options - always visible */}
             {[
-              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: -67.5 }, // Between 12 and 1:30
-              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 22.5 }, // Between 1:30 and 3
+              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: -150 }, // Between History and Reminders
+              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 90 }, // 3 o'clock
             ].map((item, index) => {
               const radius = 200;
               const radian = (item.angle * Math.PI) / 180;
