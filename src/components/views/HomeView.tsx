@@ -104,46 +104,91 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
 
-        {/* Always-Visible Radial Navigation */}
+        {/* Always-Visible Orbital Navigation */}
         {!searchTerm && (
-          <div className="relative flex items-center justify-center mb-8" style={{ height: '400px' }}>
-            {/* Central Add Button */}
+          <div className="relative flex items-center justify-center mb-8" style={{ height: '500px' }}>
+            {/* Orbital rings (visual guides) */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute w-60 h-60 border border-gray-700/30 rounded-full"></div>
+              <div className="absolute w-80 h-80 border border-gray-700/20 rounded-full"></div>
+              <div className="absolute w-96 h-96 border border-gray-700/15 rounded-full"></div>
+              <div className="absolute w-[28rem] h-[28rem] border border-gray-700/10 rounded-full"></div>
+            </div>
+
+            {/* Central Add Button (Sun) */}
             <button
               onClick={() => onViewChange('add')}
-              className="relative z-20 w-20 h-20 bg-gradient-to-r from-slate-500 to-gray-600 rounded-full font-bold hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center shadow-2xl text-white group"
+              className="relative z-20 w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full font-bold hover:from-yellow-400 hover:to-orange-500 transition-all flex items-center justify-center shadow-2xl text-white group animate-pulse"
+              style={{ animationDuration: '1.5s' }}
             >
               <Plus className="w-8 h-8" />
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
                 Add New Item
               </div>
             </button>
 
-            {/* Navigation items in clockwise radial pattern - always visible */}
+            {/* First Orbit - Main Navigation */}
             {[
-              { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: -90 }, // 12 o'clock
-              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -30 }, // 1 o'clock
-              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 30 }, // 2 o'clock
-              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 150 }, // 8 o'clock
-              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 210 }, // 10 o'clock
-            ].map((item, index) => {
-              const radius = 140;
-              const radian = (item.angle * Math.PI) / 180;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              return (
+              { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', startAngle: 0, size: 'w-16 h-16' },
+              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', startAngle: 120, size: 'w-16 h-16' },
+              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', startAngle: 240, size: 'w-16 h-16' },
+            ].map((item, index) => (
+              <div
+                key={`orbit1-${item.view}`}
+                className="absolute w-60 h-60 animate-spin"
+                style={{
+                  animationDuration: '30s',
+                  animationTimingFunction: 'linear',
+                  animationDelay: `${item.startAngle / 360 * 30}s`,
+                  transform: `rotate(${item.startAngle}deg)`
+                }}
+              >
                 <button
-                  key={item.view}
                   onClick={() => onViewChange(item.view)}
-                  className={`absolute w-16 h-16 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-pulse`}
+                  className={`absolute -top-8 left-1/2 transform -translate-x-1/2 ${item.size} bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group`}
                   style={{
-                    left: `calc(50% + ${x}px - 32px)`,
-                    top: `calc(50% + ${y}px - 32px)`,
-                    animationDelay: `${index * 0.1}s`,
-                    animationDuration: '2s'
+                    animationDuration: '30s',
+                    animationTimingFunction: 'linear',
+                    animationDelay: `${item.startAngle / 360 * -30}s`
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
+                  onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
                 >
-                  <item.icon className="w-6 h-6" />
+                  <item.icon className="w-6 h-6 animate-spin" style={{ animationDuration: '30s', animationDirection: 'reverse' }} />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    {item.label}
+                  </div>
+                </button>
+              </div>
+            ))}
+
+            {/* Second Orbit - Time & Alerts */}
+            {[
+              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', startAngle: 45, size: 'w-14 h-14' },
+              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', startAngle: 225, size: 'w-14 h-14' },
+            ].map((item, index) => (
+              <div
+                key={`orbit2-${item.view}`}
+                className="absolute w-80 h-80 animate-spin"
+                style={{
+                  animationDuration: '45s',
+                  animationTimingFunction: 'linear',
+                  animationDelay: `${item.startAngle / 360 * 45}s`,
+                  transform: `rotate(${item.startAngle}deg)`
+                }}
+              >
+                <button
+                  onClick={() => onViewChange(item.view)}
+                  className={`absolute -top-7 left-1/2 transform -translate-x-1/2 ${item.size} bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group`}
+                  style={{
+                    animationDuration: '45s',
+                    animationTimingFunction: 'linear',
+                    animationDelay: `${item.startAngle / 360 * -45}s`
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
+                  onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
+                >
+                  <item.icon className="w-5 h-5 animate-spin" style={{ animationDuration: '45s', animationDirection: 'reverse' }} />
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
                     {item.label}
                     {item.view === 'reminders' && upcomingReminders.length > 0 && (
@@ -153,41 +198,78 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )}
                   </div>
                 </button>
-              );
-            })}
+              </div>
+            ))}
 
-            {/* Secondary ring for additional options - always visible */}
+            {/* Third Orbit - Settings & Support */}
             {[
-              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: -150 }, // Between History and Reminders
-              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 90 }, // 3 o'clock
-            ].map((item, index) => {
-              const radius = 200;
-              const radian = (item.angle * Math.PI) / 180;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              return (
+              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', startAngle: 90, size: 'w-12 h-12' },
+              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', startAngle: 270, size: 'w-12 h-12' },
+            ].map((item, index) => (
+              <div
+                key={`orbit3-${item.view}`}
+                className="absolute w-96 h-96 animate-spin"
+                style={{
+                  animationDuration: '60s',
+                  animationTimingFunction: 'linear',
+                  animationDelay: `${item.startAngle / 360 * 60}s`,
+                  transform: `rotate(${item.startAngle}deg)`
+                }}
+              >
                 <button
-                  key={item.view}
                   onClick={() => onViewChange(item.view)}
-                  className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-pulse`}
+                  className={`absolute -top-6 left-1/2 transform -translate-x-1/2 ${item.size} bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
                   style={{
-                    left: `calc(50% + ${x}px - 24px)`,
-                    top: `calc(50% + ${y}px - 24px)`,
-                    animationDelay: `${(index + 8) * 0.1}s`,
-                    animationDuration: '2s'
+                    animationDuration: '60s',
+                    animationTimingFunction: 'linear',
+                    animationDelay: `${item.startAngle / 360 * -60}s`
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
+                  onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-4 h-4 animate-spin" style={{ animationDuration: '60s', animationDirection: 'reverse' }} />
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
                     {item.label}
                   </div>
                 </button>
-              );
-            })}
+              </div>
+            ))}
+
+            {/* Fourth Orbit - Additional Features */}
+            {[
+              { icon: Camera, label: 'Quick Scan', view: 'quick-scan', color: 'from-cyan-600 to-blue-600', startAngle: 0, size: 'w-10 h-10' },
+              { icon: Route, label: 'Find Items', view: 'find-items', color: 'from-indigo-600 to-purple-600', startAngle: 180, size: 'w-10 h-10' },
+            ].map((item, index) => (
+              <div
+                key={`orbit4-${item.view}`}
+                className="absolute w-[28rem] h-[28rem] animate-spin"
+                style={{
+                  animationDuration: '75s',
+                  animationTimingFunction: 'linear',
+                  animationDelay: `${item.startAngle / 360 * 75}s`,
+                  transform: `rotate(${item.startAngle}deg)`
+                }}
+              >
+                <button
+                  onClick={() => onViewChange(item.view)}
+                  className={`absolute -top-5 left-1/2 transform -translate-x-1/2 ${item.size} bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
+                  style={{
+                    animationDuration: '75s',
+                    animationTimingFunction: 'linear',
+                    animationDelay: `${item.startAngle / 360 * -75}s`
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
+                  onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
+                >
+                  <item.icon className="w-4 h-4 animate-spin" style={{ animationDuration: '75s', animationDirection: 'reverse' }} />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    {item.label}
+                  </div>
+                </button>
+              </div>
+            ))}
           </div>
         )}
-
         {searchTerm && (
           <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 mb-6">
             <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
