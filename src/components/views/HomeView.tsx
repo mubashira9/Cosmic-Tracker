@@ -104,87 +104,128 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
 
-        {/* Always-Visible Radial Navigation */}
+        {/* Solar System Navigation */}
         {!searchTerm && (
-          <div className="relative flex items-center justify-center mb-8" style={{ height: '400px' }}>
-            {/* Central Add Button */}
+          <div className="relative flex items-center justify-center mb-8" style={{ height: '450px' }}>
+            {/* Orbital paths (visual rings) */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-80 h-80 border border-gray-700/30 rounded-full"></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-96 h-96 border border-gray-600/20 rounded-full"></div>
+            </div>
+
+            {/* Central Sun (Add Button) */}
             <button
               onClick={() => onViewChange('add')}
-              className="relative z-20 w-20 h-20 bg-gradient-to-r from-slate-500 to-gray-600 rounded-full font-bold hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center shadow-2xl text-white group"
+              className="relative z-20 w-24 h-24 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full font-bold hover:from-yellow-300 hover:to-orange-400 transition-all flex items-center justify-center shadow-2xl text-white group animate-pulse"
+              style={{ animationDuration: '3s' }}
             >
-              <Plus className="w-8 h-8" />
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                Add New Item
+              <Plus className="w-10 h-10" />
+              <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                ☀️ Add New Item
               </div>
             </button>
 
-            {/* Navigation items in clockwise radial pattern - always visible */}
+            {/* Inner Planets (Main Navigation) */}
             {[
-              { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: -90 }, // 12 o'clock
-              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -30 }, // 1 o'clock
-              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 30 }, // 2 o'clock
-              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 150 }, // 8 o'clock
-              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 210 }, // 10 o'clock
-            ].map((item, index) => {
-              const radius = 140;
-              const radian = (item.angle * Math.PI) / 180;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              return (
+              { icon: Package, label: '🪐 Inventory', view: 'inventory', color: 'from-gray-500 to-gray-700', planet: 'Mercury', size: 'w-12 h-12', speed: '20s' },
+              { icon: Map, label: '🌍 Visual Maps', view: 'visual-map', color: 'from-blue-500 to-blue-700', planet: 'Venus', size: 'w-14 h-14', speed: '25s' },
+              { icon: Users, label: '🔴 Item Groups', view: 'groups', color: 'from-red-500 to-red-700', planet: 'Mars', size: 'w-13 h-13', speed: '30s' },
+              { icon: Bell, label: '🟠 Reminders', view: 'reminders', color: 'from-orange-500 to-orange-700', planet: 'Jupiter', size: 'w-16 h-16', speed: '35s' },
+              { icon: History, label: '🪐 History', view: 'history', color: 'from-yellow-600 to-yellow-800', planet: 'Saturn', size: 'w-15 h-15', speed: '40s' },
+            ].map((planet, index) => (
+              <div
+                key={planet.view}
+                className="absolute inset-0 flex items-center justify-center animate-spin"
+                style={{
+                  animationDuration: planet.speed,
+                  animationDelay: `${index * 2}s`,
+                  animationDirection: 'normal'
+                }}
+              >
                 <button
-                  key={item.view}
-                  onClick={() => onViewChange(item.view)}
-                  className={`absolute w-16 h-16 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-pulse`}
+                  onClick={() => onViewChange(planet.view)}
+                  className={`${planet.size} bg-gradient-to-r ${planet.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group relative`}
                   style={{
-                    left: `calc(50% + ${x}px - 32px)`,
-                    top: `calc(50% + ${y}px - 32px)`,
-                    animationDelay: `${index * 0.1}s`,
-                    animationDuration: '2s'
+                    transform: `translateY(-${140 + index * 20}px)`,
+                    animation: `counter-rotate-${planet.speed} ${planet.speed} linear infinite reverse`
                   }}
                 >
-                  <item.icon className="w-6 h-6" />
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                    {item.label}
-                    {item.view === 'reminders' && upcomingReminders.length > 0 && (
+                  <planet.icon className="w-5 h-5" />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30 pointer-events-none">
+                    {planet.label}
+                    {planet.view === 'reminders' && upcomingReminders.length > 0 && (
                       <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
                         {upcomingReminders.length}
                       </span>
                     )}
                   </div>
                 </button>
-              );
-            })}
+              </div>
+            ))}
 
-            {/* Secondary ring for additional options - always visible */}
+            {/* Outer Planets (Secondary Navigation) */}
             {[
-              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: -150 }, // Between History and Reminders
-              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 90 }, // 3 o'clock
-            ].map((item, index) => {
-              const radius = 200;
-              const radian = (item.angle * Math.PI) / 180;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              return (
+              { icon: Settings, label: '⚙️ Settings', view: 'settings', color: 'from-gray-600 to-slate-600', size: 'w-10 h-10', speed: '50s' },
+              { icon: HelpCircle, label: '💫 Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', size: 'w-10 h-10', speed: '60s' },
+            ].map((planet, index) => (
+              <div
+                key={planet.view}
+                className="absolute inset-0 flex items-center justify-center animate-spin"
+                style={{
+                  animationDuration: planet.speed,
+                  animationDelay: `${index * 5}s`,
+                  animationDirection: 'normal'
+                }}
+              >
                 <button
-                  key={item.view}
-                  onClick={() => onViewChange(item.view)}
-                  className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-pulse`}
+                  onClick={() => onViewChange(planet.view)}
+                  className={`${planet.size} bg-gradient-to-r ${planet.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group relative`}
                   style={{
-                    left: `calc(50% + ${x}px - 24px)`,
-                    top: `calc(50% + ${y}px - 24px)`,
-                    animationDelay: `${(index + 8) * 0.1}s`,
-                    animationDuration: '2s'
+                    transform: `translateY(-${200 + index * 15}px)`,
+                    animation: `counter-rotate-${planet.speed} ${planet.speed} linear infinite reverse`
                   }}
                 >
-                  <item.icon className="w-5 h-5" />
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                    {item.label}
+                  <planet.icon className="w-4 h-4" />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30 pointer-events-none">
+                    {planet.label}
                   </div>
                 </button>
-              );
-            })}
+              </div>
+            ))}
+
+            {/* CSS animations for counter-rotation */}
+            <style jsx>{`
+              @keyframes counter-rotate-20s {
+                from { transform: translateY(-140px) rotate(0deg); }
+                to { transform: translateY(-140px) rotate(-360deg); }
+              }
+              @keyframes counter-rotate-25s {
+                from { transform: translateY(-160px) rotate(0deg); }
+                to { transform: translateY(-160px) rotate(-360deg); }
+              }
+              @keyframes counter-rotate-30s {
+                from { transform: translateY(-180px) rotate(0deg); }
+                to { transform: translateY(-180px) rotate(-360deg); }
+              }
+              @keyframes counter-rotate-35s {
+                from { transform: translateY(-200px) rotate(0deg); }
+                to { transform: translateY(-200px) rotate(-360deg); }
+              }
+              @keyframes counter-rotate-40s {
+                from { transform: translateY(-220px) rotate(0deg); }
+                to { transform: translateY(-220px) rotate(-360deg); }
+              }
+              @keyframes counter-rotate-50s {
+                from { transform: translateY(-200px) rotate(0deg); }
+                to { transform: translateY(-200px) rotate(-360deg); }
+              }
+              @keyframes counter-rotate-60s {
+                from { transform: translateY(-215px) rotate(0deg); }
+                to { transform: translateY(-215px) rotate(-360deg); }
+              }
+            `}</style>
           </div>
         )}
 
