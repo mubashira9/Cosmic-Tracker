@@ -130,35 +130,12 @@ export const Help: React.FC<HelpProps> = ({ onClose }) => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Archive className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-slate-400">Virtual Drawers & Boxes</h3>
-                  <p className="text-gray-300 text-sm">Create nested containers like "Drawer 2 → Box A → USB drives" for micro-organization.</p>
-                </div>
-              </div>
 
               <div className="flex items-start gap-3">
                 <Users className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-slate-400">Item Groups</h3>
                   <p className="text-gray-300 text-sm">Group related items together into collections or repositories for better organization.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Route className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-slate-400">Virtual Tour</h3>
-                  <p className="text-gray-300 text-sm">Take a virtual walk through your rooms and storage spaces to visualize your inventory.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Camera className="w-5 h-5 text-pink-400 flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-slate-400">Photo Search</h3>
-                  <p className="text-gray-300 text-sm">Search for items by uploading a photo and matching it with your inventory images.</p>
                 </div>
               </div>
 
