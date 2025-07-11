@@ -65,13 +65,31 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </h1>
           </div>
           <p className="text-sm text-gray-300">Welcome back, {user?.email}</p>
-          <button
-            onClick={onSignOut}
-            className="mt-2 px-3 py-1 bg-red-600/20 border border-red-500/50 rounded-full text-red-300 hover:bg-red-600/30 transition-colors text-xs flex items-center gap-1 mx-auto"
-          >
-            <LogOut className="w-3 h-3" />
-            Sign Out
-          </button>
+          
+          {/* Header buttons row */}
+          <div className="flex justify-center gap-2 mt-3">
+            <button
+              onClick={() => onViewChange('settings')}
+              className="px-3 py-1 bg-gray-600/20 border border-gray-500/50 rounded-full text-gray-300 hover:bg-gray-600/30 transition-colors text-xs flex items-center gap-1"
+            >
+              <Settings className="w-3 h-3" />
+              Settings
+            </button>
+            <button
+              onClick={() => onViewChange('help')}
+              className="px-3 py-1 bg-purple-600/20 border border-purple-500/50 rounded-full text-purple-300 hover:bg-purple-600/30 transition-colors text-xs flex items-center gap-1"
+            >
+              <HelpCircle className="w-3 h-3" />
+              Help
+            </button>
+            <button
+              onClick={onSignOut}
+              className="px-3 py-1 bg-red-600/20 border border-red-500/50 rounded-full text-red-300 hover:bg-red-600/30 transition-colors text-xs flex items-center gap-1"
+            >
+              <LogOut className="w-3 h-3" />
+              Sign Out
+            </button>
+          </div>
         </div>
 
         <div className="relative mb-6">
@@ -104,87 +122,122 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
 
-        {/* Always-Visible Radial Navigation */}
+        {/* Orbital Navigation */}
         {!searchTerm && (
-          <div className="relative flex items-center justify-center mb-8" style={{ height: '400px' }}>
-            {/* Central Add Button */}
+          <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
+            {/* Central Add Button - Sun */}
             <button
               onClick={() => onViewChange('add')}
-              className="relative z-20 w-20 h-20 bg-gradient-to-r from-slate-500 to-gray-600 rounded-full font-bold hover:from-slate-400 hover:to-gray-500 transition-all flex items-center justify-center shadow-2xl text-white group"
+              className="relative z-20 w-24 h-24 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full font-bold hover:from-yellow-400 hover:to-orange-400 transition-all flex items-center justify-center shadow-2xl text-white group animate-pulse"
+              style={{ animationDuration: '3s' }}
             >
-              <Plus className="w-8 h-8" />
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+              <Plus className="w-10 h-10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full animate-ping opacity-20"></div>
+              <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                 Add New Item
               </div>
             </button>
 
-            {/* Navigation items in clockwise radial pattern - always visible */}
-            {[
-              { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: -90 }, // 12 o'clock
-              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: -30 }, // 1 o'clock
-              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 30 }, // 2 o'clock
-              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 150 }, // 8 o'clock
-              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 210 }, // 10 o'clock
-            ].map((item, index) => {
-              const radius = 140;
-              const radian = (item.angle * Math.PI) / 180;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              return (
-                <button
-                  key={item.view}
-                  onClick={() => onViewChange(item.view)}
-                  className={`absolute w-16 h-16 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-pulse`}
-                  style={{
-                    left: `calc(50% + ${x}px - 32px)`,
-                    top: `calc(50% + ${y}px - 32px)`,
-                    animationDelay: `${index * 0.1}s`,
-                    animationDuration: '2s'
-                  }}
-                >
-                  <item.icon className="w-6 h-6" />
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                    {item.label}
-                    {item.view === 'reminders' && upcomingReminders.length > 0 && (
-                      <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                        {upcomingReminders.length}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+            {/* Inner orbit - Primary navigation */}
+            <div className="absolute inset-0 rounded-full border border-gray-600/30 animate-spin" style={{ 
+              width: '280px', 
+              height: '280px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '30s'
+            }}>
+              {[
+                { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: 0 },
+                { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 90 },
+                { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 180 },
+                { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: 270 },
+              ].map((item, index) => {
+                const radius = 140;
+                const radian = (item.angle * Math.PI) / 180;
+                const x = Math.cos(radian) * radius;
+                const y = Math.sin(radian) * radius;
+                
+                return (
+                  <button
+                    key={item.view}
+                    onClick={() => onViewChange(item.view)}
+                    className={`absolute w-14 h-14 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-spin`}
+                    style={{
+                      left: `calc(50% + ${x}px - 28px)`,
+                      top: `calc(50% + ${y}px - 28px)`,
+                      animationDirection: 'reverse',
+                      animationDuration: '30s'
+                    }}
+                  >
+                    <item.icon className="w-6 h-6" />
+                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                      {item.label}
+                      {item.view === 'reminders' && upcomingReminders.length > 0 && (
+                        <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                          {upcomingReminders.length}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-            {/* Secondary ring for additional options - always visible */}
-            {[
-              { icon: Settings, label: 'Settings', view: 'settings', color: 'from-gray-600 to-slate-600', angle: -150 }, // Between History and Reminders
-              { icon: HelpCircle, label: 'Help & Guide', view: 'help', color: 'from-purple-600 to-pink-600', angle: 90 }, // 3 o'clock
-            ].map((item, index) => {
-              const radius = 200;
-              const radian = (item.angle * Math.PI) / 180;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              return (
-                <button
-                  key={item.view}
-                  onClick={() => onViewChange(item.view)}
-                  className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-pulse`}
-                  style={{
-                    left: `calc(50% + ${x}px - 24px)`,
-                    top: `calc(50% + ${y}px - 24px)`,
-                    animationDelay: `${(index + 8) * 0.1}s`,
-                    animationDuration: '2s'
-                  }}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                    {item.label}
-                  </div>
-                </button>
-              );
-            })}
+            {/* Outer orbit - Secondary navigation */}
+            <div className="absolute inset-0 rounded-full border border-gray-700/20 animate-spin" style={{ 
+              width: '360px', 
+              height: '360px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '45s',
+              animationDirection: 'reverse'
+            }}>
+              {[
+                { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 45 },
+              ].map((item, index) => {
+                const radius = 180;
+                const radian = (item.angle * Math.PI) / 180;
+                const x = Math.cos(radian) * radius;
+                const y = Math.sin(radian) * radius;
+                
+                return (
+                  <button
+                    key={item.view}
+                    onClick={() => onViewChange(item.view)}
+                    className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-spin`}
+                    style={{
+                      left: `calc(50% + ${x}px - 24px)`,
+                      top: `calc(50% + ${y}px - 24px)`,
+                      animationDirection: 'normal',
+                      animationDuration: '45s'
+                    }}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                      {item.label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Orbital trails/rings for visual effect */}
+            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
+              width: '200px', 
+              height: '200px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}></div>
+            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
+              width: '320px', 
+              height: '320px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}></div>
           </div>
         )}
 
