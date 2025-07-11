@@ -125,6 +125,32 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Orbital Navigation */}
         {!searchTerm && (
           <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
+            {/* Static orbital rings for visual effect */}
+            <div className="absolute inset-0 rounded-full border border-gray-600/20 animate-spin" style={{ 
+              width: '280px', 
+              height: '280px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '60s'
+            }}></div>
+            <div className="absolute inset-0 rounded-full border border-gray-700/10 animate-spin" style={{ 
+              width: '360px', 
+              height: '360px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '80s',
+              animationDirection: 'reverse'
+            }}></div>
+            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
+              width: '200px', 
+              height: '200px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}></div>
+
             {/* Central Add Button - Sun */}
             <button
               onClick={() => onViewChange('add')}
@@ -138,106 +164,73 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             </button>
 
-            {/* Inner orbit - Primary navigation */}
-            <div className="absolute inset-0 rounded-full border border-gray-600/30 animate-spin" style={{ 
-              width: '280px', 
-              height: '280px',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '30s'
-            }}>
-              {[
-                { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: 0 },
-                { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 90 },
-                { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 180 },
-                { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: 270 },
-              ].map((item, index) => {
-                const radius = 140;
-                const radian = (item.angle * Math.PI) / 180;
-                const x = Math.cos(radian) * radius;
-                const y = Math.sin(radian) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => onViewChange(item.view)}
-                    className={`absolute w-14 h-14 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group animate-spin`}
-                    style={{
-                      left: `calc(50% + ${x}px - 28px)`,
-                      top: `calc(50% + ${y}px - 28px)`,
-                      animationDirection: 'reverse',
-                      animationDuration: '30s'
-                    }}
-                  >
-                    <item.icon className="w-6 h-6" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                      {item.view === 'reminders' && upcomingReminders.length > 0 && (
-                        <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                          {upcomingReminders.length}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Inner orbit - Primary navigation - Static buttons */}
+            {[
+              { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: 0 },
+              { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 90 },
+              { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 180 },
+              { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: 270 },
+            ].map((item, index) => {
+              const radius = 140;
+              const radian = (item.angle * Math.PI) / 180;
+              const x = Math.cos(radian) * radius;
+              const y = Math.sin(radian) * radius;
+              
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => {
+                    console.log('Navigating to:', item.view);
+                    onViewChange(item.view);
+                  }}
+                  className={`absolute w-14 h-14 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group z-30`}
+                  style={{
+                    left: `calc(50% + ${x}px - 28px)`,
+                    top: `calc(50% + ${y}px - 28px)`
+                  }}
+                >
+                  <item.icon className="w-6 h-6" />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    {item.label}
+                    {item.view === 'reminders' && upcomingReminders.length > 0 && (
+                      <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                        {upcomingReminders.length}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
 
-            {/* Outer orbit - Secondary navigation */}
-            <div className="absolute inset-0 rounded-full border border-gray-700/20 animate-spin" style={{ 
-              width: '360px', 
-              height: '360px',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '45s',
-              animationDirection: 'reverse'
-            }}>
-              {[
-                { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 45 },
-              ].map((item, index) => {
-                const radius = 180;
-                const radian = (item.angle * Math.PI) / 180;
-                const x = Math.cos(radian) * radius;
-                const y = Math.sin(radian) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => onViewChange(item.view)}
-                    className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group animate-spin`}
-                    style={{
-                      left: `calc(50% + ${x}px - 24px)`,
-                      top: `calc(50% + ${y}px - 24px)`,
-                      animationDirection: 'normal',
-                      animationDuration: '45s'
-                    }}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Orbital trails/rings for visual effect */}
-            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
-              width: '200px', 
-              height: '200px',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)'
-            }}></div>
-            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
-              width: '320px', 
-              height: '320px',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)'
-            }}></div>
+            {/* Outer orbit - Secondary navigation - Static buttons */}
+            {[
+              { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 45 },
+            ].map((item, index) => {
+              const radius = 180;
+              const radian = (item.angle * Math.PI) / 180;
+              const x = Math.cos(radian) * radius;
+              const y = Math.sin(radian) * radius;
+              
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => {
+                    console.log('Navigating to:', item.view);
+                    onViewChange(item.view);
+                  }}
+                  className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group z-30`}
+                  style={{
+                    left: `calc(50% + ${x}px - 24px)`,
+                    top: `calc(50% + ${y}px - 24px)`
+                  }}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    {item.label}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 
