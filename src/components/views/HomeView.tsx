@@ -55,6 +55,79 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 text-white relative">
       <StarField />
       
+      {/* Add custom CSS for orbital animations */}
+      <style jsx>{`
+        @keyframes orbit1 {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes orbit2 {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes orbit3 {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes orbit4 {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes orbit5 {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes counterRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(-360deg); }
+        }
+        
+        .orbit-container-1 {
+          animation: orbit1 20s linear infinite;
+        }
+        
+        .orbit-container-2 {
+          animation: orbit2 25s linear infinite;
+        }
+        
+        .orbit-container-3 {
+          animation: orbit3 30s linear infinite;
+        }
+        
+        .orbit-container-4 {
+          animation: orbit4 35s linear infinite reverse;
+        }
+        
+        .orbit-container-5 {
+          animation: orbit5 40s linear infinite;
+        }
+        
+        .orbit-button {
+          animation: counterRotate 20s linear infinite;
+        }
+        
+        .orbit-button-2 {
+          animation: counterRotate 25s linear infinite;
+        }
+        
+        .orbit-button-3 {
+          animation: counterRotate 30s linear infinite;
+        }
+        
+        .orbit-button-4 {
+          animation: counterRotate 35s linear infinite reverse;
+        }
+        
+        .orbit-button-5 {
+          animation: counterRotate 40s linear infinite;
+        }
+      `}</style>
+      
       <div className="relative z-10 p-4 max-w-md mx-auto">
         <div className="text-center mb-6 pt-4">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -122,7 +195,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
 
-       {/* Orbital Navigation */}
+        {/* Orbital Navigation */}
         {!searchTerm && (
           <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
             {/* Fixed orbital rings for visual effect */}
@@ -156,208 +229,148 @@ export const HomeView: React.FC<HomeViewProps> = ({
             >
               <Plus className="w-10 h-10" />
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full animate-ping opacity-20"></div>
-              <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                 Add New Item
               </div>
             </button>
 
             {/* First orbit - Package/Inventory */}
-            <div className="absolute inset-0 animate-spin z-30" style={{ 
+            <div className="absolute orbit-container-1 pointer-events-none" style={{ 
               width: '280px', 
               height: '280px',
               left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '20s'
+              top: '50%'
             }}>
-              {(() => {
-                const item = { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600' };
-                const radius = 140;
-                const x = Math.cos(0) * radius;
-                const y = Math.sin(0) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => {
-                      console.log('Navigating to:', item.view);
-                      onViewChange(item.view);
-                    }}
-                    className={`absolute w-14 h-14 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group`}
-                    style={{
-                      left: `calc(50% + ${x}px - 28px)`,
-                      top: `calc(50% + ${y}px - 28px)`,
-                      animation: 'spin 20s linear infinite reverse'
-                    }}
-                  >
-                    <item.icon className="w-6 h-6" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                    </div>
-                  </button>
-                );
-              })()}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Navigating to: inventory');
+                  onViewChange('inventory');
+                }}
+                className="absolute w-14 h-14 bg-gradient-to-r from-gray-600 to-slate-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group orbit-button pointer-events-auto"
+                style={{
+                  left: 'calc(50% + 140px - 28px)',
+                  top: 'calc(50% + 0px - 28px)'
+                }}
+              >
+                <Package className="w-6 h-6" />
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                  Inventory
+                </div>
+              </button>
             </div>
 
             {/* Second orbit - Bell/Reminders */}
-            <div className="absolute inset-0 animate-spin z-30" style={{ 
+            <div className="absolute orbit-container-2 pointer-events-none" style={{ 
               width: '360px', 
               height: '360px',
               left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '25s'
+              top: '50%'
             }}>
-              {(() => {
-                const item = { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600' };
-                const radius = 180;
-                const x = Math.cos(0) * radius;
-                const y = Math.sin(0) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => {
-                      console.log('Navigating to:', item.view);
-                      onViewChange(item.view);
-                    }}
-                    className={`absolute w-12 h-12 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
-                    style={{
-                      left: `calc(50% + ${x}px - 24px)`,
-                      top: `calc(50% + ${y}px - 24px)`,
-                      animation: 'spin 25s linear infinite reverse'
-                    }}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                      {item.view === 'reminders' && upcomingReminders.length > 0 && (
-                        <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                          {upcomingReminders.length}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })()}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Navigating to: reminders');
+                  onViewChange('reminders');
+                }}
+                className="absolute w-12 h-12 bg-gradient-to-r from-orange-600 to-red-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-2 pointer-events-auto"
+                style={{
+                  left: 'calc(50% + 180px - 24px)',
+                  top: 'calc(50% + 0px - 24px)'
+                }}
+              >
+                <Bell className="w-5 h-5" />
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                  Reminders
+                  {upcomingReminders.length > 0 && (
+                    <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                      {upcomingReminders.length}
+                    </span>
+                  )}
+                </div>
+              </button>
             </div>
 
             {/* Third orbit - History */}
-            <div className="absolute inset-0 animate-spin z-30" style={{ 
+            <div className="absolute orbit-container-3 pointer-events-none" style={{ 
               width: '440px', 
               height: '440px',
               left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '30s'
+              top: '50%'
             }}>
-              {(() => {
-                const item = { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600' };
-                const radius = 220;
-                const x = Math.cos(0) * radius;
-                const y = Math.sin(0) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => {
-                      console.log('Navigating to:', item.view);
-                      onViewChange(item.view);
-                    }}
-                    className={`absolute w-10 h-10 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
-                    style={{
-                      left: `calc(50% + ${x}px - 20px)`,
-                      top: `calc(50% + ${y}px - 20px)`,
-                      animation: 'spin 30s linear infinite reverse'
-                    }}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                    </div>
-                  </button>
-                );
-              })()}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Navigating to: history');
+                  onViewChange('history');
+                }}
+                className="absolute w-10 h-10 bg-gradient-to-r from-green-600 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-3 pointer-events-auto"
+                style={{
+                  left: 'calc(50% + 220px - 20px)',
+                  top: 'calc(50% + 0px - 20px)'
+                }}
+              >
+                <History className="w-4 h-4" />
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                  History
+                </div>
+              </button>
             </div>
 
             {/* Fourth orbit - Visual Maps */}
-            <div className="absolute inset-0 animate-spin z-30" style={{ 
+            <div className="absolute orbit-container-4 pointer-events-none" style={{ 
               width: '440px', 
               height: '440px',
               left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '35s',
-              animationDirection: 'reverse'
+              top: '50%'
             }}>
-              {(() => {
-                const item = { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600' };
-                const radius = 220;
-                const x = Math.cos(Math.PI) * radius; // Start at opposite side
-                const y = Math.sin(Math.PI) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => {
-                      console.log('Navigating to:', item.view);
-                      onViewChange(item.view);
-                    }}
-                    className={`absolute w-10 h-10 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
-                    style={{
-                      left: `calc(50% + ${x}px - 20px)`,
-                      top: `calc(50% + ${y}px - 20px)`,
-                      animation: 'spin 35s linear infinite'
-                    }}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                    </div>
-                  </button>
-                );
-              })()}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Navigating to: visual-map');
+                  onViewChange('visual-map');
+                }}
+                className="absolute w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-4 pointer-events-auto"
+                style={{
+                  left: 'calc(50% - 220px - 20px)',
+                  top: 'calc(50% + 0px - 20px)'
+                }}
+              >
+                <Map className="w-4 h-4" />
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                  Visual Maps
+                </div>
+              </button>
             </div>
 
             {/* Fifth orbit - Item Groups */}
-            <div className="absolute inset-0 animate-spin z-30" style={{ 
+            <div className="absolute orbit-container-5 pointer-events-none" style={{ 
               width: '440px', 
               height: '440px',
               left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              animationDuration: '40s'
+              top: '50%'
             }}>
-              {(() => {
-                const item = { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600' };
-                const radius = 220;
-                const x = Math.cos(Math.PI/2) * radius; // Start at bottom
-                const y = Math.sin(Math.PI/2) * radius;
-                
-                return (
-                  <button
-                    key={item.view}
-                    onClick={() => {
-                      console.log('Navigating to:', item.view);
-                      onViewChange(item.view);
-                    }}
-                    className={`absolute w-10 h-10 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
-                    style={{
-                      left: `calc(50% + ${x}px - 20px)`,
-                      top: `calc(50% + ${y}px - 20px)`,
-                      animation: 'spin 40s linear infinite reverse'
-                    }}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                      {item.label}
-                    </div>
-                  </button>
-                );
-              })()}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Navigating to: groups');
+                  onViewChange('groups');
+                }}
+                className="absolute w-10 h-10 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-5 pointer-events-auto"
+                style={{
+                  left: 'calc(50% + 0px - 20px)',
+                  top: 'calc(50% + 220px - 20px)'
+                }}
+              >
+                <Users className="w-4 h-4" />
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                  Item Groups
+                </div>
+              </button>
             </div>
           </div>
         )}
+
         {searchTerm && (
           <div className="bg-black bg-opacity-70 backdrop-blur-sm rounded-xl p-4 border border-gray-500/30 mb-6">
             <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
