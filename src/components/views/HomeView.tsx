@@ -122,7 +122,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
 
-        {/* Orbital Navigation */}
+       {/* Orbital Navigation */}
         {!searchTerm && (
           <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
             {/* Fixed orbital rings for visual effect */}
@@ -136,6 +136,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
               width: '360px', 
               height: '360px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}></div>
+            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
+              width: '440px', 
+              height: '440px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)'
@@ -154,7 +161,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             </button>
 
-            {/* Inner orbit - One option revolving clockwise */}
+            {/* First orbit - Package/Inventory */}
             <div className="absolute inset-0 animate-spin z-30" style={{ 
               width: '280px', 
               height: '280px',
@@ -192,17 +199,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
               })()}
             </div>
 
-            {/* Outer orbit - One option revolving clockwise */}
+            {/* Second orbit - Bell/Reminders */}
             <div className="absolute inset-0 animate-spin z-30" style={{ 
               width: '360px', 
               height: '360px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)',
-              animationDuration: '30s'
+              animationDuration: '25s'
             }}>
               {(() => {
-                const item = { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600' };
+                const item = { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600' };
                 const radius = 180;
                 const x = Math.cos(0) * radius;
                 const y = Math.sin(0) * radius;
@@ -218,10 +225,130 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     style={{
                       left: `calc(50% + ${x}px - 24px)`,
                       top: `calc(50% + ${y}px - 24px)`,
-                      animation: 'spin 30s linear infinite reverse'
+                      animation: 'spin 25s linear infinite reverse'
                     }}
                   >
                     <item.icon className="w-5 h-5" />
+                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                      {item.label}
+                      {item.view === 'reminders' && upcomingReminders.length > 0 && (
+                        <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                          {upcomingReminders.length}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })()}
+            </div>
+
+            {/* Third orbit - History */}
+            <div className="absolute inset-0 animate-spin z-30" style={{ 
+              width: '440px', 
+              height: '440px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '30s'
+            }}>
+              {(() => {
+                const item = { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600' };
+                const radius = 220;
+                const x = Math.cos(0) * radius;
+                const y = Math.sin(0) * radius;
+                
+                return (
+                  <button
+                    key={item.view}
+                    onClick={() => {
+                      console.log('Navigating to:', item.view);
+                      onViewChange(item.view);
+                    }}
+                    className={`absolute w-10 h-10 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
+                    style={{
+                      left: `calc(50% + ${x}px - 20px)`,
+                      top: `calc(50% + ${y}px - 20px)`,
+                      animation: 'spin 30s linear infinite reverse'
+                    }}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                      {item.label}
+                    </div>
+                  </button>
+                );
+              })()}
+            </div>
+
+            {/* Fourth orbit - Visual Maps */}
+            <div className="absolute inset-0 animate-spin z-30" style={{ 
+              width: '440px', 
+              height: '440px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '35s',
+              animationDirection: 'reverse'
+            }}>
+              {(() => {
+                const item = { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600' };
+                const radius = 220;
+                const x = Math.cos(Math.PI) * radius; // Start at opposite side
+                const y = Math.sin(Math.PI) * radius;
+                
+                return (
+                  <button
+                    key={item.view}
+                    onClick={() => {
+                      console.log('Navigating to:', item.view);
+                      onViewChange(item.view);
+                    }}
+                    className={`absolute w-10 h-10 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
+                    style={{
+                      left: `calc(50% + ${x}px - 20px)`,
+                      top: `calc(50% + ${y}px - 20px)`,
+                      animation: 'spin 35s linear infinite'
+                    }}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                      {item.label}
+                    </div>
+                  </button>
+                );
+              })()}
+            </div>
+
+            {/* Fifth orbit - Item Groups */}
+            <div className="absolute inset-0 animate-spin z-30" style={{ 
+              width: '440px', 
+              height: '440px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              animationDuration: '40s'
+            }}>
+              {(() => {
+                const item = { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600' };
+                const radius = 220;
+                const x = Math.cos(Math.PI/2) * radius; // Start at bottom
+                const y = Math.sin(Math.PI/2) * radius;
+                
+                return (
+                  <button
+                    key={item.view}
+                    onClick={() => {
+                      console.log('Navigating to:', item.view);
+                      onViewChange(item.view);
+                    }}
+                    className={`absolute w-10 h-10 bg-gradient-to-r ${item.color} rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group`}
+                    style={{
+                      left: `calc(50% + ${x}px - 20px)`,
+                      top: `calc(50% + ${y}px - 20px)`,
+                      animation: 'spin 40s linear infinite reverse'
+                    }}
+                  >
+                    <item.icon className="w-4 h-4" />
                     <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
                       {item.label}
                     </div>
