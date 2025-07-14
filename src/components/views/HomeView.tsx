@@ -125,7 +125,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Orbital Navigation */}
         {!searchTerm && (
           <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
-            {/* Orbital rings for visual effect */}
+            {/* Fixed orbital rings for visual effect */}
             <div className="absolute inset-0 rounded-full border border-gray-600/20" style={{ 
               width: '280px', 
               height: '280px',
@@ -154,25 +154,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
             </button>
 
-            {/* Inner orbit - Primary navigation - Revolving buttons */}
+            {/* Inner orbit - One option revolving clockwise */}
             <div className="absolute inset-0 animate-spin z-30" style={{ 
               width: '280px', 
               height: '280px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)',
-              animationDuration: '60s'
+              animationDuration: '20s'
             }}>
-              {[
-                { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600', angle: 0 },
-                { icon: Bell, label: 'Reminders', view: 'reminders', color: 'from-orange-600 to-red-600', angle: 90 },
-                { icon: History, label: 'History', view: 'history', color: 'from-green-600 to-teal-600', angle: 180 },
-                { icon: Map, label: 'Visual Maps', view: 'visual-map', color: 'from-blue-600 to-indigo-600', angle: 270 },
-              ].map((item, index) => {
+              {(() => {
+                const item = { icon: Package, label: 'Inventory', view: 'inventory', color: 'from-gray-600 to-slate-600' };
                 const radius = 140;
-                const radian = (item.angle * Math.PI) / 180;
-                const x = Math.cos(radian) * radius;
-                const y = Math.sin(radian) * radius;
+                const x = Math.cos(0) * radius;
+                const y = Math.sin(0) * radius;
                 
                 return (
                   <button
@@ -185,41 +180,32 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     style={{
                       left: `calc(50% + ${x}px - 28px)`,
                       top: `calc(50% + ${y}px - 28px)`,
-                      animation: 'spin 60s linear infinite reverse'
+                      animation: 'spin 20s linear infinite reverse'
                     }}
                   >
                     <item.icon className="w-6 h-6" />
                     <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-30">
                       {item.label}
-                      {item.view === 'reminders' && upcomingReminders.length > 0 && (
-                        <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                          {upcomingReminders.length}
-                        </span>
-                      )}
                     </div>
                   </button>
                 );
-              })}
+              })()}
             </div>
 
-            {/* Outer orbit - Secondary navigation - Revolving buttons */}
+            {/* Outer orbit - One option revolving clockwise */}
             <div className="absolute inset-0 animate-spin z-30" style={{ 
               width: '360px', 
               height: '360px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)',
-              animationDuration: '80s'
+              animationDuration: '30s'
             }}>
-              {[
-                { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600', angle: 0 },
-                { icon: Camera, label: 'Scanner', view: 'scanner', color: 'from-purple-600 to-pink-600', angle: 120 },
-                { icon: Route, label: 'Routes', view: 'routes', color: 'from-cyan-600 to-blue-600', angle: 240 },
-              ].map((item, index) => {
+              {(() => {
+                const item = { icon: Users, label: 'Item Groups', view: 'groups', color: 'from-emerald-600 to-teal-600' };
                 const radius = 180;
-                const radian = (item.angle * Math.PI) / 180;
-                const x = Math.cos(radian) * radius;
-                const y = Math.sin(radian) * radius;
+                const x = Math.cos(0) * radius;
+                const y = Math.sin(0) * radius;
                 
                 return (
                   <button
@@ -232,7 +218,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     style={{
                       left: `calc(50% + ${x}px - 24px)`,
                       top: `calc(50% + ${y}px - 24px)`,
-                      animation: 'spin 80s linear infinite reverse'
+                      animation: 'spin 30s linear infinite reverse'
                     }}
                   >
                     <item.icon className="w-5 h-5" />
@@ -241,7 +227,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     </div>
                   </button>
                 );
-              })}
+              })()}
             </div>
           </div>
         )}
