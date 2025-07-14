@@ -63,28 +63,48 @@ export const HomeView: React.FC<HomeViewProps> = ({
         }
         
         @keyframes orbit2 {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: translate(-50%, -50%) rotate(72deg); }
+          to { transform: translate(-50%, -50%) rotate(432deg); }
         }
         
         @keyframes orbit3 {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: translate(-50%, -50%) rotate(144deg); }
+          to { transform: translate(-50%, -50%) rotate(504deg); }
         }
         
         @keyframes orbit4 {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: translate(-50%, -50%) rotate(216deg); }
+          to { transform: translate(-50%, -50%) rotate(576deg); }
         }
         
         @keyframes orbit5 {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: translate(-50%, -50%) rotate(288deg); }
+          to { transform: translate(-50%, -50%) rotate(648deg); }
         }
         
-        @keyframes counterRotate {
+        @keyframes counterRotate1 {
           from { transform: rotate(0deg); }
           to { transform: rotate(-360deg); }
+        }
+        
+        @keyframes counterRotate2 {
+          from { transform: rotate(-72deg); }
+          to { transform: rotate(-432deg); }
+        }
+        
+        @keyframes counterRotate3 {
+          from { transform: rotate(-144deg); }
+          to { transform: rotate(-504deg); }
+        }
+        
+        @keyframes counterRotate4 {
+          from { transform: rotate(-216deg); }
+          to { transform: rotate(-576deg); }
+        }
+        
+        @keyframes counterRotate5 {
+          from { transform: rotate(-288deg); }
+          to { transform: rotate(-648deg); }
         }
         
         .orbit-container-1 {
@@ -100,7 +120,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         }
         
         .orbit-container-4 {
-          animation: orbit4 35s linear infinite reverse;
+          animation: orbit4 35s linear infinite;
         }
         
         .orbit-container-5 {
@@ -108,23 +128,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
         }
         
         .orbit-button {
-          animation: counterRotate 20s linear infinite;
+          animation: counterRotate1 20s linear infinite;
         }
         
         .orbit-button-2 {
-          animation: counterRotate 25s linear infinite;
+          animation: counterRotate2 25s linear infinite;
         }
         
         .orbit-button-3 {
-          animation: counterRotate 30s linear infinite;
+          animation: counterRotate3 30s linear infinite;
         }
         
         .orbit-button-4 {
-          animation: counterRotate 35s linear infinite reverse;
+          animation: counterRotate4 35s linear infinite;
         }
         
         .orbit-button-5 {
-          animation: counterRotate 40s linear infinite;
+          animation: counterRotate5 40s linear infinite;
         }
       `}</style>
       
@@ -198,22 +218,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Orbital Navigation */}
         {!searchTerm && (
           <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
-            {/* Fixed orbital rings for visual effect */}
-            <div className="absolute inset-0 rounded-full border border-gray-600/20" style={{ 
+            {/* Fixed orbital rings for visual effect - Made more visible */}
+            <div className="absolute inset-0 rounded-full border-2 border-gray-300/40" style={{ 
               width: '280px', 
               height: '280px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)'
             }}></div>
-            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
+            <div className="absolute inset-0 rounded-full border border-gray-300/30" style={{ 
               width: '360px', 
               height: '360px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)'
             }}></div>
-            <div className="absolute inset-0 rounded-full border border-gray-600/10" style={{ 
+            <div className="absolute inset-0 rounded-full border border-gray-300/20" style={{ 
               width: '440px', 
               height: '440px',
               left: '50%',
@@ -332,7 +352,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 }}
                 className="absolute w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-4 pointer-events-auto"
                 style={{
-                  left: 'calc(50% - 220px - 20px)',
+                  left: 'calc(50% + 220px - 20px)',
                   top: 'calc(50% + 0px - 20px)'
                 }}
               >
@@ -358,8 +378,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 }}
                 className="absolute w-10 h-10 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-5 pointer-events-auto"
                 style={{
-                  left: 'calc(50% + 0px - 20px)',
-                  top: 'calc(50% + 220px - 20px)'
+                  left: 'calc(50% + 220px - 20px)',
+                  top: 'calc(50% + 0px - 20px)'
                 }}
               >
                 <Users className="w-4 h-4" />
