@@ -55,7 +55,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 text-white relative">
       <StarField />
       
-      {/* Add custom CSS for orbital animations */}
+      {/* Add custom CSS for orbital animations with galaxy effects */}
       <style jsx>{`
         @keyframes orbit1 {
           from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -63,23 +63,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
         }
         
         @keyframes orbit2 {
-          from { transform: translate(-50%, -50%) rotate(72deg); }
-          to { transform: translate(-50%, -50%) rotate(432deg); }
+          from { transform: translate(-50%, -50%) rotate(90deg); }
+          to { transform: translate(-50%, -50%) rotate(450deg); }
         }
         
         @keyframes orbit3 {
-          from { transform: translate(-50%, -50%) rotate(144deg); }
-          to { transform: translate(-50%, -50%) rotate(504deg); }
+          from { transform: translate(-50%, -50%) rotate(180deg); }
+          to { transform: translate(-50%, -50%) rotate(540deg); }
         }
         
         @keyframes orbit4 {
-          from { transform: translate(-50%, -50%) rotate(216deg); }
-          to { transform: translate(-50%, -50%) rotate(576deg); }
+          from { transform: translate(-50%, -50%) rotate(270deg); }
+          to { transform: translate(-50%, -50%) rotate(630deg); }
         }
         
         @keyframes orbit5 {
-          from { transform: translate(-50%, -50%) rotate(288deg); }
-          to { transform: translate(-50%, -50%) rotate(648deg); }
+          from { transform: translate(-50%, -50%) rotate(45deg); }
+          to { transform: translate(-50%, -50%) rotate(405deg); }
         }
         
         @keyframes counterRotate1 {
@@ -88,63 +88,94 @@ export const HomeView: React.FC<HomeViewProps> = ({
         }
         
         @keyframes counterRotate2 {
-          from { transform: rotate(-72deg); }
-          to { transform: rotate(-432deg); }
+          from { transform: rotate(-90deg); }
+          to { transform: rotate(-450deg); }
         }
         
         @keyframes counterRotate3 {
-          from { transform: rotate(-144deg); }
-          to { transform: rotate(-504deg); }
+          from { transform: rotate(-180deg); }
+          to { transform: rotate(-540deg); }
         }
         
         @keyframes counterRotate4 {
-          from { transform: rotate(-216deg); }
-          to { transform: rotate(-576deg); }
+          from { transform: rotate(-270deg); }
+          to { transform: rotate(-630deg); }
         }
         
         @keyframes counterRotate5 {
-          from { transform: rotate(-288deg); }
-          to { transform: rotate(-648deg); }
+          from { transform: rotate(-45deg); }
+          to { transform: rotate(-405deg); }
+        }
+        
+        @keyframes galaxyRotate {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
         
         .orbit-container-1 {
-          animation: orbit1 20s linear infinite;
+          animation: orbit1 60s linear infinite;
         }
         
         .orbit-container-2 {
-          animation: orbit2 25s linear infinite;
+          animation: orbit2 80s linear infinite;
         }
         
         .orbit-container-3 {
-          animation: orbit3 30s linear infinite;
+          animation: orbit3 100s linear infinite;
         }
         
         .orbit-container-4 {
-          animation: orbit4 35s linear infinite;
+          animation: orbit4 120s linear infinite;
         }
         
         .orbit-container-5 {
-          animation: orbit5 40s linear infinite;
+          animation: orbit5 140s linear infinite;
         }
         
         .orbit-button {
-          animation: counterRotate1 20s linear infinite;
+          animation: counterRotate1 60s linear infinite;
         }
         
         .orbit-button-2 {
-          animation: counterRotate2 25s linear infinite;
+          animation: counterRotate2 80s linear infinite;
         }
         
         .orbit-button-3 {
-          animation: counterRotate3 30s linear infinite;
+          animation: counterRotate3 100s linear infinite;
         }
         
         .orbit-button-4 {
-          animation: counterRotate4 35s linear infinite;
+          animation: counterRotate4 120s linear infinite;
         }
         
         .orbit-button-5 {
-          animation: counterRotate5 40s linear infinite;
+          animation: counterRotate5 140s linear infinite;
+        }
+        
+        .galaxy-ring {
+          animation: galaxyRotate 200s linear infinite;
+        }
+        
+        .galaxy-ring-reverse {
+          animation: galaxyRotate 300s linear infinite reverse;
+        }
+        
+        .star {
+          animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        .floating-star {
+          animation: float 3s ease-in-out infinite;
         }
       `}</style>
       
@@ -217,39 +248,113 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
         {/* Orbital Navigation */}
         {!searchTerm && (
-          <div className="relative flex items-center justify-center mb-8" style={{ height: '420px' }}>
-            {/* Fixed orbital rings for visual effect - Made more visible */}
-            <div className="absolute inset-0 rounded-full border-2 border-gray-300/40" style={{ 
-              width: '280px', 
-              height: '280px',
+          <div className="relative flex items-center justify-center mb-8" style={{ height: '480px' }}>
+            {/* Galaxy Background Stars */}
+            <div className="absolute inset-0 overflow-hidden">
+              {/* Static background stars */}
+              {[...Array(50)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 bg-white rounded-full star"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 3}s`
+                  }}
+                />
+              ))}
+              
+              {/* Floating stars */}
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={`float-${i}`}
+                  className="absolute w-2 h-2 bg-blue-300 rounded-full floating-star opacity-60"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${3 + Math.random() * 4}s`
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Galaxy Spiral Arms */}
+            <div className="absolute galaxy-ring" style={{ 
+              width: '500px', 
+              height: '500px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)'
-            }}></div>
-            <div className="absolute inset-0 rounded-full border border-gray-300/30" style={{ 
-              width: '360px', 
-              height: '360px',
+            }}>
+              <div className="absolute inset-0 rounded-full border border-purple-400/20" style={{
+                borderStyle: 'dashed',
+                borderWidth: '1px'
+              }}></div>
+            </div>
+            
+            <div className="absolute galaxy-ring-reverse" style={{ 
+              width: '400px', 
+              height: '400px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)'
-            }}></div>
-            <div className="absolute inset-0 rounded-full border border-gray-300/20" style={{ 
-              width: '440px', 
-              height: '440px',
+            }}>
+              <div className="absolute inset-0 rounded-full border border-blue-400/15" style={{
+                borderStyle: 'dotted',
+                borderWidth: '2px'
+              }}></div>
+            </div>
+
+            {/* Central galaxy glow */}
+            <div className="absolute inset-0 rounded-full bg-gradient-radial from-purple-500/10 via-blue-500/5 to-transparent" style={{ 
+              width: '600px', 
+              height: '600px',
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)'
             }}></div>
 
-            {/* Central Add Button - Sun */}
+            {/* Fixed orbital rings for visual effect - Made more visible */}
+            <div className="absolute inset-0 rounded-full border-2 border-gray-300/50 shadow-lg" style={{ 
+              width: '280px', 
+              height: '280px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              boxShadow: '0 0 20px rgba(255,255,255,0.2)'
+            }}></div>
+            <div className="absolute inset-0 rounded-full border border-gray-300/40 shadow-md" style={{ 
+              width: '360px', 
+              height: '360px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              boxShadow: '0 0 15px rgba(255,255,255,0.1)'
+            }}></div>
+            <div className="absolute inset-0 rounded-full border border-gray-300/30 shadow-sm" style={{ 
+              width: '440px', 
+              height: '440px',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              boxShadow: '0 0 10px rgba(255,255,255,0.05)'
+            }}></div>
+
+            {/* Central Add Button - Sun with enhanced glow */}
             <button
               onClick={() => onViewChange('add')}
-              className="relative z-20 w-24 h-24 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full font-bold hover:from-yellow-400 hover:to-orange-400 transition-all flex items-center justify-center shadow-2xl text-white group animate-pulse"
-              style={{ animationDuration: '3s' }}
+              className="relative z-30 w-28 h-28 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full font-bold hover:from-yellow-300 hover:via-orange-400 hover:to-red-400 transition-all flex items-center justify-center shadow-2xl text-white group"
+              style={{ 
+                boxShadow: '0 0 40px rgba(255,165,0,0.6), 0 0 80px rgba(255,165,0,0.3)',
+                animation: 'pulse 4s ease-in-out infinite'
+              }}
             >
-              <Plus className="w-10 h-10" />
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full animate-ping opacity-20"></div>
-              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+              <Plus className="w-12 h-12" />
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full animate-ping opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full animate-ping opacity-10" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute -bottom-14 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                 Add New Item
               </div>
             </button>
@@ -267,14 +372,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   console.log('Navigating to: inventory');
                   onViewChange('inventory');
                 }}
-                className="absolute w-14 h-14 bg-gradient-to-r from-gray-600 to-slate-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group orbit-button pointer-events-auto"
+                className="absolute w-16 h-16 bg-gradient-to-r from-gray-500 to-slate-700 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-xl text-white group orbit-button pointer-events-auto"
                 style={{
-                  left: 'calc(50% + 140px - 28px)',
-                  top: 'calc(50% + 0px - 28px)'
+                  left: 'calc(50% + 140px - 32px)',
+                  top: 'calc(50% + 0px - 32px)',
+                  boxShadow: '0 0 20px rgba(107,114,128,0.4)'
                 }}
               >
-                <Package className="w-6 h-6" />
-                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                <Package className="w-7 h-7" />
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                   Inventory
                 </div>
               </button>
@@ -293,14 +399,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   console.log('Navigating to: reminders');
                   onViewChange('reminders');
                 }}
-                className="absolute w-12 h-12 bg-gradient-to-r from-orange-600 to-red-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-2 pointer-events-auto"
+                className="absolute w-14 h-14 bg-gradient-to-r from-orange-500 to-red-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-2 pointer-events-auto"
                 style={{
-                  left: 'calc(50% + 180px - 24px)',
-                  top: 'calc(50% + 0px - 24px)'
+                  left: 'calc(50% + 180px - 28px)',
+                  top: 'calc(50% + 0px - 28px)',
+                  boxShadow: '0 0 20px rgba(234,88,12,0.4)'
                 }}
               >
-                <Bell className="w-5 h-5" />
-                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                <Bell className="w-6 h-6" />
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                   Reminders
                   {upcomingReminders.length > 0 && (
                     <span className="ml-1 bg-red-500 text-white text-xs px-1 rounded-full">
@@ -324,14 +431,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   console.log('Navigating to: history');
                   onViewChange('history');
                 }}
-                className="absolute w-10 h-10 bg-gradient-to-r from-green-600 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-3 pointer-events-auto"
+                className="absolute w-12 h-12 bg-gradient-to-r from-green-500 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-3 pointer-events-auto"
                 style={{
-                  left: 'calc(50% + 220px - 20px)',
-                  top: 'calc(50% + 0px - 20px)'
+                  left: 'calc(50% + 220px - 24px)',
+                  top: 'calc(50% + 0px - 24px)',
+                  boxShadow: '0 0 20px rgba(34,197,94,0.4)'
                 }}
               >
-                <History className="w-4 h-4" />
-                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                <History className="w-5 h-5" />
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                   History
                 </div>
               </button>
@@ -350,14 +458,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   console.log('Navigating to: visual-map');
                   onViewChange('visual-map');
                 }}
-                className="absolute w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-4 pointer-events-auto"
+                className="absolute w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-4 pointer-events-auto"
                 style={{
-                  left: 'calc(50% + 220px - 20px)',
-                  top: 'calc(50% + 0px - 20px)'
+                  left: 'calc(50% + 220px - 24px)',
+                  top: 'calc(50% + 0px - 24px)',
+                  boxShadow: '0 0 20px rgba(59,130,246,0.4)'
                 }}
               >
-                <Map className="w-4 h-4" />
-                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                <Map className="w-5 h-5" />
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                   Visual Maps
                 </div>
               </button>
@@ -376,14 +485,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   console.log('Navigating to: groups');
                   onViewChange('groups');
                 }}
-                className="absolute w-10 h-10 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-5 pointer-events-auto"
+                className="absolute w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full hover:scale-110 transition-all flex items-center justify-center shadow-lg text-white group orbit-button-5 pointer-events-auto"
                 style={{
-                  left: 'calc(50% + 220px - 20px)',
-                  top: 'calc(50% + 0px - 20px)'
+                  left: 'calc(50% + 220px - 24px)',
+                  top: 'calc(50% + 0px - 24px)',
+                  boxShadow: '0 0 20px rgba(16,185,129,0.4)'
                 }}
               >
-                <Users className="w-4 h-4" />
-                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                <Users className="w-5 h-5" />
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                   Item Groups
                 </div>
               </button>
